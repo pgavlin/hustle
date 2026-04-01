@@ -97,12 +97,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model.
 func (m Model) View() tea.View {
+	var v tea.View
 	switch m.view {
 	case viewDetail:
-		return m.detail.View()
+		v = m.detail.View()
 	default:
-		return tea.NewView(m.grid.View() + "\n" + m.statusBar())
+		v = tea.NewView(m.grid.View() + "\n" + m.statusBar())
 	}
+	v.AltScreen = true
+	return v
 }
 
 func (m Model) statusBar() string {
