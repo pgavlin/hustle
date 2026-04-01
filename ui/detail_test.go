@@ -20,7 +20,7 @@ func testRecord() logpkg.LogRecord {
 
 func TestDetailModel_StructuredView(t *testing.T) {
 	m := NewDetailModel(testRecord(), 80, 24)
-	view := m.View()
+	view := m.View().Content
 
 	for _, want := range []string{"INFO", "server started", "port", "8080"} {
 		if !strings.Contains(view, want) {
@@ -32,7 +32,7 @@ func TestDetailModel_StructuredView(t *testing.T) {
 func TestDetailModel_RawView(t *testing.T) {
 	m := NewDetailModel(testRecord(), 80, 24)
 	m.mode = detailRaw
-	view := m.View()
+	view := m.View().Content
 
 	for _, want := range []string{`"level"`, `"server started"`} {
 		if !strings.Contains(view, want) {

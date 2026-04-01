@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
 
 	logpkg "github.com/pgavlin/hustle/log"
@@ -66,7 +66,7 @@ func (m *DetailModel) SetSize(width, height int) {
 // Update handles key messages for the detail view.
 func (m DetailModel) Update(msg tea.Msg) (DetailModel, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "tab":
 			m.toggleMode()
@@ -82,7 +82,7 @@ func (m DetailModel) Update(msg tea.Msg) (DetailModel, tea.Cmd) {
 }
 
 // View renders the detail view.
-func (m DetailModel) View() string {
+func (m DetailModel) View() tea.View {
 	var content string
 	switch m.mode {
 	case detailStructured:
@@ -104,7 +104,7 @@ func (m DetailModel) View() string {
 		visible = visible[:bodyHeight]
 	}
 
-	return header + "\n\n" + strings.Join(visible, "\n") + "\n\n" + help
+	return tea.NewView(header + "\n\n" + strings.Join(visible, "\n") + "\n\n" + help)
 }
 
 func (m DetailModel) headerText() string {
