@@ -60,6 +60,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyPressMsg:
+		// Let the grid handle keys when it's in a filter editing mode.
+		if m.view == viewGrid && m.grid.Filtering() {
+			break
+		}
 		switch msg.String() {
 		case "ctrl+c", "q":
 			if m.view == viewGrid {
