@@ -57,8 +57,10 @@ func Complete(expr string, cursorPos int, inputShape Shape) []Suggestion {
 	prefix := expr[:tokenStart]
 
 	if token == "" {
-		// Check if we're in a value position (RHS of comparison) with enum values
-		if ctx.valueShape != nil {
+		// Check if we're in a value position (RHS of comparison) with enum values.
+		// But don't suggest if cursor is right after a closing quote (value already entered).
+		rightAfterQuote := cursorPos > 0 && expr[cursorPos-1] == '"'
+		if ctx.valueShape != nil && !rightAfterQuote {
 			if vals := EnumValues(ctx.valueShape); vals != nil {
 				for _, v := range vals {
 					suggestions = append(suggestions, Suggestion{Text: prefix + formatValue(v)})
