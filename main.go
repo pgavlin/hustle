@@ -47,18 +47,19 @@ func run(ctx context.Context, cmd *cli.Command) error {
 
 	var records []logpkg.LogRecord
 	var skipped int
+	var detected logpkg.Format
 	var err error
 
 	if cmd.NArg() > 0 {
-		records, skipped, _, err = logpkg.Load(cmd.Args().First(), format)
+		records, skipped, detected, err = logpkg.Load(cmd.Args().First(), format)
 	} else {
-		records, skipped, _, err = logpkg.LoadReader(os.Stdin, format)
+		records, skipped, detected, err = logpkg.LoadReader(os.Stdin, format)
 	}
 	if err != nil {
 		return err
 	}
 
-	m := ui.New(records, skipped)
+	m := ui.New(records, skipped, detected.Name())
 	p := tea.NewProgram(m)
 	_, err = p.Run()
 	return err

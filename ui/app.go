@@ -30,6 +30,7 @@ var statusBarStyle = lipgloss.NewStyle().
 type Model struct {
 	records    []logpkg.LogRecord
 	skipped    int
+	formatName string
 	inputShape jq.Shape
 	grid       grid.Model[logpkg.LogRecord]
 	detail     DetailModel
@@ -42,10 +43,11 @@ type Model struct {
 }
 
 // New creates the top-level model with loaded records.
-func New(records []logpkg.LogRecord, skipped int) Model {
+func New(records []logpkg.LogRecord, skipped int, formatName string) Model {
 	return Model{
 		records:    records,
 		skipped:    skipped,
+		formatName: formatName,
 		inputShape: jq.InferShape(records),
 		view:       viewGrid,
 	}
@@ -170,7 +172,7 @@ func (m Model) View() tea.View {
 }
 
 func (m Model) statusBar() string {
-	text := fmt.Sprintf(" %d records", len(m.records))
+	text := fmt.Sprintf(" [%s] %d records", m.formatName, len(m.records))
 	if m.skipped > 0 {
 		text += fmt.Sprintf(", %d skipped", m.skipped)
 	}
