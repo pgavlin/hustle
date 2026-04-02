@@ -1,0 +1,59 @@
+{"time":"2025-03-14T08:00:01.042Z","level":"INFO","msg":"starting server","version":"1.4.2","commit":"a3f9b12","go_version":"go1.22.1","pid":14823}
+{"time":"2025-03-14T08:00:01.058Z","level":"DEBUG","msg":"loading configuration","config_path":"/etc/myapp/config.yaml","env":"production"}
+{"time":"2025-03-14T08:00:01.061Z","level":"INFO","msg":"configuration loaded","db_host":"db-primary.internal:5432","redis_host":"redis.internal:6379","listen_addr":":8080","read_timeout_s":30,"write_timeout_s":60,"max_conns":200}
+{"time":"2025-03-14T08:00:01.063Z","level":"INFO","msg":"connecting to database","host":"db-primary.internal","port":5432,"db":"appdb","user":"appuser","pool_min":5,"pool_max":50}
+{"time":"2025-03-14T08:00:01.198Z","level":"INFO","msg":"database connection established","host":"db-primary.internal","latency_ms":135,"pool_size":5}
+{"time":"2025-03-14T08:00:01.201Z","level":"INFO","msg":"running database migrations","current_version":47,"target_version":47}
+{"time":"2025-03-14T08:00:01.203Z","level":"INFO","msg":"migrations up to date","version":47}
+{"time":"2025-03-14T08:00:01.205Z","level":"INFO","msg":"connecting to redis","host":"redis.internal","port":6379}
+{"time":"2025-03-14T08:00:01.289Z","level":"INFO","msg":"redis connection established","latency_ms":84}
+{"time":"2025-03-14T08:00:01.291Z","level":"INFO","msg":"registering routes","route_count":34}
+{"time":"2025-03-14T08:00:01.295Z","level":"INFO","msg":"server listening","addr":":8080","tls":false}
+{"ts":1741939263.841,"level":"debug","msg":"inbound request","request_id":"req_01HXKZ9VBW","method":"GET","path":"/healthz","ip":"10.0.1.15","user_agent":"kube-probe/1.28"}
+{"ts":1741939263.843,"level":"debug","msg":"health check ok","request_id":"req_01HXKZ9VBW","db_ok":true,"redis_ok":true}
+{"ts":1741939263.844,"level":"info","msg":"request complete","request_id":"req_01HXKZ9VBW","method":"GET","path":"/healthz","status":200,"duration_ms":2.1,"bytes_written":15}
+{"time":"2025-03-14T08:00:32.117Z","level":"INFO","msg":"inbound request","request_id":"req_01HXKZG4T1","method":"POST","path":"/api/v1/sessions","ip":"203.0.113.42","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36","headers":{"Content-Type":"application/json","X-Forwarded-For":"203.0.113.42","X-Request-ID":"ext-7f3a9b"}}
+{"time":"2025-03-14T08:00:32.119Z","level":"DEBUG","msg":"authenticating user","request_id":"req_01HXKZG4T1","email":"alice@example.com"}
+{"time":"2025-03-14T08:00:32.134Z","level":"DEBUG","msg":"cache lookup","request_id":"req_01HXKZG4T1","key":"user:alice@example.com","cache_hit":false}
+{"time":"2025-03-14T08:00:32.189Z","level":"DEBUG","msg":"db query","request_id":"req_01HXKZG4T1","db_query":"SELECT id, email, password_hash, roles FROM users WHERE email=$1","duration_ms":54.2}
+{"time":"2025-03-14T08:00:32.194Z","level":"DEBUG","msg":"cache write","request_id":"req_01HXKZG4T1","key":"user:alice@example.com","ttl_s":300}
+{"time":"2025-03-14T08:00:32.231Z","level":"INFO","msg":"user authenticated","request_id":"req_01HXKZG4T1","user_id":"usr_0001","email":"alice@example.com","roles":["admin","editor"]}
+{"time":"2025-03-14T08:00:32.238Z","level":"INFO","msg":"request complete","request_id":"req_01HXKZG4T1","method":"POST","path":"/api/v1/sessions","status":201,"duration_ms":121.3,"bytes_written":284,"user_id":"usr_0001"}
+{"ts":1741939234.501,"level":"info","msg":"inbound request","request_id":"req_01HXKZH9MW","method":"GET","path":"/api/v1/documents","ip":"203.0.113.42","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36","user_id":"usr_0001"}
+{"ts":1741939234.503,"level":"debug","msg":"cache lookup","request_id":"req_01HXKZH9MW","key":"docs:usr_0001:page:1","cache_hit":true}
+{"ts":1741939234.504,"level":"info","msg":"request complete","request_id":"req_01HXKZH9MW","method":"GET","path":"/api/v1/documents","status":200,"duration_ms":3.1,"bytes_written":4820,"user_id":"usr_0001","cache_hit":true}
+{"time":"2025-03-14T08:01:05.883Z","level":"INFO","msg":"inbound request","request_id":"req_01HXKZR7VN","method":"GET","path":"/api/v1/documents/doc_0042","ip":"198.51.100.7","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36","user_id":"usr_0022"}
+{"time":"2025-03-14T08:01:05.885Z","level":"DEBUG","msg":"cache lookup","request_id":"req_01HXKZR7VN","key":"doc:doc_0042","cache_hit":false}
+{"time":"2025-03-14T08:01:05.939Z","level":"DEBUG","msg":"db query","request_id":"req_01HXKZR7VN","db_query":"SELECT d.*, u.email as owner_email FROM documents d JOIN users u ON d.owner_id=u.id WHERE d.id=$1","duration_ms":53.8}
+{"time":"2025-03-14T08:01:05.941Z","level":"DEBUG","msg":"authorization check","request_id":"req_01HXKZR7VN","user_id":"usr_0022","resource":"doc_0042","action":"read","granted":true}
+{"time":"2025-03-14T08:01:05.942Z","level":"INFO","msg":"request complete","request_id":"req_01HXKZR7VN","method":"GET","path":"/api/v1/documents/doc_0042","status":200,"duration_ms":58.9,"bytes_written":12483,"user_id":"usr_0022"}
+{"ts":1741939298.002,"level":"warn","msg":"cache miss rate elevated","window_s":60,"miss_rate":0.73,"threshold":0.5,"keys_checked":847}
+{"time":"2025-03-14T08:02:14.772Z","level":"INFO","msg":"inbound request","request_id":"req_01HXL00BPQ","method":"POST","path":"/api/v1/documents","ip":"203.0.113.42","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36","user_id":"usr_0001"}
+{"time":"2025-03-14T08:02:14.774Z","level":"DEBUG","msg":"validating request body","request_id":"req_01HXL00BPQ","content_type":"application/json","body_bytes":1842}
+{"time":"2025-03-14T08:02:14.776Z","level":"DEBUG","msg":"db begin transaction","request_id":"req_01HXL00BPQ"}
+{"time":"2025-03-14T08:02:14.841Z","level":"DEBUG","msg":"db query","request_id":"req_01HXL00BPQ","db_query":"INSERT INTO documents (id, owner_id, title, content, created_at) VALUES ($1,$2,$3,$4,$5)","duration_ms":64.1}
+{"time":"2025-03-14T08:02:14.901Z","level":"DEBUG","msg":"db query","request_id":"req_01HXL00BPQ","db_query":"INSERT INTO document_tags (document_id, tag) SELECT $1, unnest($2::text[])","tags":["project-alpha","q1-2025","draft"],"duration_ms":59.8}
+{"time":"2025-03-14T08:02:14.902Z","level":"DEBUG","msg":"db commit transaction","request_id":"req_01HXL00BPQ"}
+{"time":"2025-03-14T08:02:14.907Z","level":"INFO","msg":"document created","request_id":"req_01HXL00BPQ","document_id":"doc_0501","user_id":"usr_0001","title":"Q1 Planning Notes","tags":["project-alpha","q1-2025","draft"]}
+{"time":"2025-03-14T08:02:14.908Z","level":"INFO","msg":"request complete","request_id":"req_01HXL00BPQ","method":"POST","path":"/api/v1/documents","status":201,"duration_ms":135.9,"bytes_written":389,"user_id":"usr_0001"}
+{"ts":1741939395.114,"level":"warn","msg":"slow db query","request_id":"req_01HXL0FQZR","db_query":"SELECT * FROM documents WHERE owner_id=$1 ORDER BY updated_at DESC LIMIT 50","duration_ms":312.4,"threshold_ms":200}
+{"ts":1741939407.881,"level":"error","msg":"db query timeout","request_id":"req_01HXL0H8KM","db_query":"SELECT d.*, COUNT(c.id) as comment_count FROM documents d LEFT JOIN comments c ON c.document_id=d.id WHERE d.id=$1 GROUP BY d.id","duration_ms":5003.2,"timeout_ms":5000,"error":"context deadline exceeded","retry":1}
+{"ts":1741939412.994,"level":"warn","msg":"retrying db query","request_id":"req_01HXL0H8KM","retry":2,"backoff_ms":500}
+{"ts":1741939413.501,"level":"debug","msg":"db query","request_id":"req_01HXL0H8KM","db_query":"SELECT d.*, COUNT(c.id) as comment_count FROM documents d LEFT JOIN comments c ON c.document_id=d.id WHERE d.id=$1 GROUP BY d.id","duration_ms":287.3,"retry":2}
+{"ts":1741939413.503,"level":"info","msg":"request complete","request_id":"req_01HXL0H8KM","method":"GET","path":"/api/v1/documents/doc_0387","status":200,"duration_ms":5795.1,"bytes_written":9241,"user_id":"usr_0088","retries":1}
+{"ts":1741939421.772,"level":"warn","msg":"db connection pool pressure","pool_size":50,"in_use":47,"waiting":3,"max_wait_ms":840}
+{"time":"2025-03-14T08:04:55.003Z","level":"INFO","msg":"inbound request","request_id":"req_01HXL0T9BV","method":"DELETE","path":"/api/v1/documents/doc_0099","ip":"192.0.2.88","user_agent":"myapp-cli/2.1.0","user_id":"usr_0055"}
+{"time":"2025-03-14T08:04:55.007Z","level":"DEBUG","msg":"authorization check","request_id":"req_01HXL0T9BV","user_id":"usr_0055","resource":"doc_0099","action":"delete","granted":false,"reason":"not owner"}
+{"time":"2025-03-14T08:04:55.008Z","level":"WARN","msg":"authorization denied","request_id":"req_01HXL0T9BV","user_id":"usr_0055","resource":"doc_0099","action":"delete"}
+{"time":"2025-03-14T08:04:55.009Z","level":"INFO","msg":"request complete","request_id":"req_01HXL0T9BV","method":"DELETE","path":"/api/v1/documents/doc_0099","status":403,"duration_ms":5.9,"bytes_written":62,"user_id":"usr_0055"}
+{"ts":1741939598.441,"level":"info","msg":"db pool recovered","pool_size":50,"in_use":12,"waiting":0}
+{"ts":1741939598.442,"level":"info","msg":"cache miss rate normalized","window_s":60,"miss_rate":0.31,"keys_checked":1203}
+{"time":"2025-03-14T08:17:43.001Z","level":"INFO","msg":"received shutdown signal","signal":"SIGTERM"}
+{"time":"2025-03-14T08:17:43.003Z","level":"INFO","msg":"stopping request listener","addr":":8080"}
+{"time":"2025-03-14T08:17:43.004Z","level":"INFO","msg":"draining in-flight requests","inflight":7}
+{"time":"2025-03-14T08:17:44.819Z","level":"INFO","msg":"all requests drained","elapsed_ms":1815}
+{"time":"2025-03-14T08:17:44.821Z","level":"INFO","msg":"closing database pool","open_conns":12}
+{"time":"2025-03-14T08:17:44.847Z","level":"INFO","msg":"database pool closed"}
+{"time":"2025-03-14T08:17:44.849Z","level":"INFO","msg":"closing redis connection"}
+{"time":"2025-03-14T08:17:44.863Z","level":"INFO","msg":"redis connection closed"}
+{"time":"2025-03-14T08:17:44.864Z","level":"INFO","msg":"server stopped cleanly","uptime_s":1063.569}

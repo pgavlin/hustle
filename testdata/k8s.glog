@@ -1,0 +1,65 @@
+I0314 08:00:01.042391       1 controller.go:142] Starting deployment controller
+I0314 08:00:01.043112       1 controller.go:155] Waiting for informer caches to sync
+I0314 08:00:01.143881       1 controller.go:162] Informer caches synced
+I0314 08:00:01.144002       1 scheduler.go:201] Starting scheduler
+I0314 08:00:01.144731       1 scheduler.go:218] Scheduler cache synced nodes=5
+I0314 08:00:01.801244       1 sync.go:88] "starting sync loop" namespace=default
+I0314 08:00:02.312004       1 controller.go:284] "reconciling deployment" deployment=default/api-server generation=7
+I0314 08:00:02.398771       1 controller.go:301] "deployment up to date" deployment=default/api-server replicas=6 readyReplicas=6
+I0314 08:00:02.399001       1 controller.go:284] "reconciling deployment" deployment=default/worker generation=3
+I0314 08:00:02.441882       1 controller.go:301] "deployment up to date" deployment=default/worker replicas=3 readyReplicas=3
+I0314 08:01:14.002831       1 scheduler.go:341] "attempting to schedule pod" pod=default/api-server-6d9f8c7b4-xzqpk
+I0314 08:01:14.004112       1 scheduler.go:388] "pod fits node" pod=default/api-server-6d9f8c7b4-xzqpk node=node-3 score=82
+I0314 08:01:14.004883       1 scheduler.go:388] "pod fits node" pod=default/api-server-6d9f8c7b4-xzqpk node=node-1 score=74
+I0314 08:01:14.004901       1 scheduler.go:388] "pod fits node" pod=default/api-server-6d9f8c7b4-xzqpk node=node-5 score=71
+I0314 08:01:14.005114       1 scheduler.go:421] "binding pod to node" pod=default/api-server-6d9f8c7b4-xzqpk node=node-3
+I0314 08:01:15.882441       1 sync.go:214] "pod scheduled and running" pod=default/api-server-6d9f8c7b4-xzqpk node=node-3 start_latency_s=1.877
+I0314 08:02:00.001882       1 sync.go:301] "configmap updated" configmap=default/api-config version=14
+I0314 08:02:00.003441       1 controller.go:412] "triggering rolling restart due to configmap change" deployment=default/api-server configmap=default/api-config
+I0314 08:02:00.441882       1 controller.go:284] "reconciling deployment" deployment=default/api-server generation=8
+W0314 08:02:01.882331       1 controller.go:498] "pod terminating slowly" pod=default/api-server-6d9f8c7b4-9mntq termination_grace_period_s=30 elapsed_s=31
+I0314 08:02:03.114002       1 scheduler.go:341] "attempting to schedule pod" pod=default/api-server-7c8d9e2f1-a4bpv
+I0314 08:02:03.115441       1 scheduler.go:421] "binding pod to node" pod=default/api-server-7c8d9e2f1-a4bpv node=node-1
+I0314 08:02:04.778002       1 sync.go:214] "pod scheduled and running" pod=default/api-server-7c8d9e2f1-a4bpv node=node-1 start_latency_s=1.664
+I0314 08:02:05.003441       1 scheduler.go:341] "attempting to schedule pod" pod=default/api-server-7c8d9e2f1-bq7rk
+I0314 08:02:05.004882       1 scheduler.go:421] "binding pod to node" pod=default/api-server-7c8d9e2f1-bq7rk node=node-4
+I0314 08:02:06.661002       1 sync.go:214] "pod scheduled and running" pod=default/api-server-7c8d9e2f1-bq7rk node=node-4 start_latency_s=1.657
+I0314 08:02:07.441881       1 controller.go:301] "deployment up to date" deployment=default/api-server replicas=6 readyReplicas=6 generation=8
+I0314 08:03:22.114002       1 scheduler.go:341] "attempting to schedule pod" pod=default/batch-job-20250314-0300-4f9gz
+E0314 08:03:22.441882       1 scheduler.go:502] "failed to schedule pod: insufficient resources" pod=default/batch-job-20250314-0300-4f9gz reason="Insufficient cpu" requested_cpu=4000m allocatable_cpu=3800m node=node-2
+E0314 08:03:22.442001       1 scheduler.go:502] "failed to schedule pod: insufficient resources" pod=default/batch-job-20250314-0300-4f9gz reason="Insufficient cpu" requested_cpu=4000m allocatable_cpu=3200m node=node-5
+I0314 08:03:22.442113       1 scheduler.go:521] "pod is unschedulable, will retry" pod=default/batch-job-20250314-0300-4f9gz retry_after_s=30
+I0314 08:04:01.008832       1 sync.go:388] "pod image pull" pod=default/worker-f3c7a8b5d-zn9kp image="registry.acme.internal/platform/worker:v2.7.1"
+E0314 08:04:31.441882       1 sync.go:412] "image pull failed" pod=default/worker-f3c7a8b5d-zn9kp image="registry.acme.internal/platform/worker:v2.7.1" error="rpc error: code = Unknown desc = failed to pull and unpack image: failed to resolve reference: unexpected status code 503 Service Unavailable"
+W0314 08:04:31.442001       1 sync.go:431] "backing off image pull" pod=default/worker-f3c7a8b5d-zn9kp backoff=10s
+E0314 08:04:41.882441       1 sync.go:412] "image pull failed" pod=default/worker-f3c7a8b5d-zn9kp image="registry.acme.internal/platform/worker:v2.7.1" error="rpc error: code = Unknown desc = failed to pull and unpack image: failed to resolve reference: unexpected status code 503 Service Unavailable"
+W0314 08:04:41.882561       1 sync.go:431] "backing off image pull" pod=default/worker-f3c7a8b5d-zn9kp backoff=20s
+I0314 08:05:01.884002       1 sync.go:388] "pod image pull" pod=default/worker-f3c7a8b5d-zn9kp image="registry.acme.internal/platform/worker:v2.7.1"
+I0314 08:05:14.221441       1 sync.go:401] "image pull succeeded" pod=default/worker-f3c7a8b5d-zn9kp image="registry.acme.internal/platform/worker:v2.7.1" duration_s=13.337
+I0314 08:05:14.882002       1 sync.go:214] "pod scheduled and running" pod=default/worker-f3c7a8b5d-zn9kp node=node-2 start_latency_s=73.874
+I0314 08:05:52.441882       1 scheduler.go:341] "attempting to schedule pod" pod=default/batch-job-20250314-0300-4f9gz
+I0314 08:05:52.443001       1 scheduler.go:421] "binding pod to node" pod=default/batch-job-20250314-0300-4f9gz node=node-2
+I0314 08:05:54.114002       1 sync.go:214] "pod scheduled and running" pod=default/batch-job-20250314-0300-4f9gz node=node-2 start_latency_s=2.673
+I0314 08:07:11.441882       1 sync.go:512] "OOMKill observed" pod=default/worker-5b8a2c9d1-p3xmv container=worker node=node-3 limit_memory_mi=512 used_memory_mi=511
+E0314 08:07:11.442001       1 controller.go:601] "container OOMKilled" pod=default/worker-5b8a2c9d1-p3xmv container=worker exit_code=137 restart_count=1
+I0314 08:07:12.001882       1 controller.go:618] "restarting container after OOMKill" pod=default/worker-5b8a2c9d1-p3xmv container=worker backoff_s=10
+I0314 08:07:22.441882       1 sync.go:214] "container restarted" pod=default/worker-5b8a2c9d1-p3xmv container=worker restart_count=1
+W0314 08:07:22.442001       1 controller.go:631] "pod restart count elevated" pod=default/worker-5b8a2c9d1-p3xmv restart_count=1 threshold=5
+I0314 08:08:44.114002       1 sync.go:512] "OOMKill observed" pod=default/worker-5b8a2c9d1-p3xmv container=worker node=node-3 limit_memory_mi=512 used_memory_mi=512
+E0314 08:08:44.115441       1 controller.go:601] "container OOMKilled" pod=default/worker-5b8a2c9d1-p3xmv container=worker exit_code=137 restart_count=2
+I0314 08:10:19.882441       1 sync.go:512] "OOMKill observed" pod=default/worker-5b8a2c9d1-p3xmv container=worker node=node-3 limit_memory_mi=512 used_memory_mi=512
+E0314 08:10:19.882561       1 controller.go:601] "container OOMKilled" pod=default/worker-5b8a2c9d1-p3xmv container=worker exit_code=137 restart_count=3
+W0314 08:10:19.882671       1 controller.go:648] "pod entering CrashLoopBackOff" pod=default/worker-5b8a2c9d1-p3xmv container=worker restart_count=3 backoff_s=40
+E0314 08:11:00.441882       1 sync.go:601] "readiness probe failed" pod=default/api-server-7c8d9e2f1-c9zmw container=api-server probe=http path=/healthz status=500
+W0314 08:11:00.442001       1 controller.go:712] "removing pod from service endpoints" pod=default/api-server-7c8d9e2f1-c9zmw service=default/api-server-svc
+I0314 08:11:05.114002       1 sync.go:601] "readiness probe passed" pod=default/api-server-7c8d9e2f1-c9zmw container=api-server probe=http path=/healthz status=200
+I0314 08:11:05.114882       1 controller.go:728] "adding pod back to service endpoints" pod=default/api-server-7c8d9e2f1-c9zmw service=default/api-server-svc
+I0314 08:13:01.882441       1 sync.go:301] "configmap updated" configmap=default/worker-config version=8
+I0314 08:13:01.884002       1 controller.go:412] "triggering rolling restart due to configmap change" deployment=default/worker configmap=default/worker-config
+I0314 08:13:02.441882       1 controller.go:284] "reconciling deployment" deployment=default/worker generation=4
+I0314 08:13:03.114002       1 scheduler.go:341] "attempting to schedule pod" pod=default/worker-7e1b3f4c2-h8nvq
+I0314 08:13:03.115441       1 scheduler.go:421] "binding pod to node" pod=default/worker-7e1b3f4c2-h8nvq node=node-5
+I0314 08:13:05.221882       1 sync.go:214] "pod scheduled and running" pod=default/worker-7e1b3f4c2-h8nvq node=node-5 start_latency_s=2.107
+I0314 08:13:07.441882       1 controller.go:301] "deployment up to date" deployment=default/worker replicas=3 readyReplicas=3 generation=4
+I0314 08:14:33.001882       1 sync.go:88] "sync loop heartbeat" namespace=default deployments=4 pods=18 healthy=17 degraded=1
+W0314 08:14:33.002441       1 controller.go:771] "deployment degraded" deployment=default/worker pod=default/worker-5b8a2c9d1-p3xmv reason=CrashLoopBackOff restart_count=3

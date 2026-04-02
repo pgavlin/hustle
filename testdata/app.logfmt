@@ -1,0 +1,52 @@
+time=2025-03-14T09:00:00.122Z level=info component=pipeline msg="pipeline started" build_id=build-20250314-0042 version=v2.7.1 triggered_by=push branch=main commit=c8f3a91
+time=2025-03-14T09:00:00.891Z level=info component=builder msg="cloning repository" build_id=build-20250314-0042 repo="git@github.com:acme/platform.git" depth=1
+time=2025-03-14T09:00:03.441Z level=info component=builder msg="repository cloned" build_id=build-20250314-0042 duration=2.55s files=4831
+time=2025-03-14T09:00:03.509Z level=info component=builder msg="restoring dependency cache" build_id=build-20250314-0042 cache_key="go-mod-sha256-c3f8a7"
+time=2025-03-14T09:00:04.201Z level=info component=builder msg="dependency cache hit" build_id=build-20250314-0042 duration=0.692s modules=312
+time=2025-03-14T09:00:04.215Z level=info component=builder msg="compiling" build_id=build-20250314-0042 os=linux arch=amd64 cgo=false
+time=2025-03-14T09:00:51.803Z level=info component=builder msg="compilation successful" build_id=build-20250314-0042 duration=47.588s binary_size_mb=38.2
+time=2025-03-14T09:00:51.811Z level=info component=test-runner msg="starting test suite" build_id=build-20250314-0042 packages=87 parallelism=8
+time=2025-03-14T09:00:55.302Z level=info component=test-runner msg="test passed" build_id=build-20250314-0042 test=TestUserAuth/valid_credentials duration=0.342s
+time=2025-03-14T09:00:55.719Z level=info component=test-runner msg="test passed" build_id=build-20250314-0042 test=TestUserAuth/expired_token duration=0.415s
+time=2025-03-14T09:00:56.001Z level=warn component=test-runner msg="test flaky retry" build_id=build-20250314-0042 test=TestDocumentSearch/full_text_with_filters attempt=1 error="context deadline exceeded"
+time=2025-03-14T09:00:59.112Z level=info component=test-runner msg="test passed" build_id=build-20250314-0042 test=TestDocumentSearch/full_text_with_filters attempt=2 duration=3.111s
+time=2025-03-14T09:01:02.448Z level=info component=test-runner msg="test passed" build_id=build-20250314-0042 test=TestPermissions/owner_can_delete duration=0.287s
+time=2025-03-14T09:01:02.449Z level=info component=test-runner msg="test passed" build_id=build-20250314-0042 test=TestPermissions/non_owner_denied duration=0.122s
+time=2025-03-14T09:01:04.881Z level=warn component=test-runner msg="test flaky retry" build_id=build-20250314-0042 test=TestWebhookDelivery/retry_on_5xx attempt=1 error="tcp connection refused"
+time=2025-03-14T09:01:08.003Z level=warn component=test-runner msg="test flaky retry" build_id=build-20250314-0042 test=TestWebhookDelivery/retry_on_5xx attempt=2 error="tcp connection refused"
+time=2025-03-14T09:01:11.214Z level=info component=test-runner msg="test passed" build_id=build-20250314-0042 test=TestWebhookDelivery/retry_on_5xx attempt=3 duration=7.333s
+time=2025-03-14T09:01:18.774Z level=info component=test-runner msg="all tests passed" build_id=build-20250314-0042 total=87 passed=87 failed=0 skipped=2 duration=27.0s flaky_retries=3
+time=2025-03-14T09:01:18.801Z level=info component=image-builder msg="building container image" build_id=build-20250314-0042 dockerfile=Dockerfile context_size_mb=42.1 tag=v2.7.1
+time=2025-03-14T09:01:19.002Z level=debug component=image-builder msg="layer cache status" build_id=build-20250314-0042 layer="base:golang-1.22-alpine" cached=true
+time=2025-03-14T09:01:19.003Z level=debug component=image-builder msg="layer cache status" build_id=build-20250314-0042 layer="deps" cached=true
+time=2025-03-14T09:01:19.004Z level=debug component=image-builder msg="layer cache status" build_id=build-20250314-0042 layer="binary" cached=false
+time=2025-03-14T09:01:22.887Z level=info component=image-builder msg="image built" build_id=build-20250314-0042 image="registry.acme.internal/platform/api" tag=v2.7.1 size_mb=94.3 duration=4.086s
+time=2025-03-14T09:01:23.001Z level=info component=image-builder msg="pushing image" build_id=build-20250314-0042 image="registry.acme.internal/platform/api" tag=v2.7.1
+time=2025-03-14T09:01:38.441Z level=info component=image-builder msg="image pushed" build_id=build-20250314-0042 image="registry.acme.internal/platform/api" tag=v2.7.1 digest="sha256:4a9f3c1e8b2d7f6a0c5e9b3d8f1a4e7c2b5d8f0a3c6e9b2d5f8a1c4e7b0d3f" duration=15.44s
+time=2025-03-14T09:01:38.501Z level=info component=deployer msg="deploying to staging" build_id=build-20250314-0042 env=staging image="registry.acme.internal/platform/api:v2.7.1" replicas=2
+time=2025-03-14T09:01:41.002Z level=info component=deployer msg="rolling update in progress" build_id=build-20250314-0042 env=staging updated=1 ready=1 available=2
+time=2025-03-14T09:01:44.333Z level=info component=deployer msg="rolling update in progress" build_id=build-20250314-0042 env=staging updated=2 ready=2 available=2
+time=2025-03-14T09:01:44.441Z level=info component=deployer msg="deployment complete" build_id=build-20250314-0042 env=staging replicas=2 healthy=2 duration=5.94s
+time=2025-03-14T09:01:44.501Z level=info component=healthcheck msg="running health checks" build_id=build-20250314-0042 env=staging endpoint="https://staging.api.acme.internal/healthz" attempts=1
+time=2025-03-14T09:01:45.088Z level=info component=healthcheck msg="health check passed" build_id=build-20250314-0042 env=staging status=200 duration=0.587s
+time=2025-03-14T09:01:45.101Z level=info component=healthcheck msg="running smoke tests" build_id=build-20250314-0042 env=staging tests=5
+time=2025-03-14T09:01:47.882Z level=info component=healthcheck msg="smoke tests passed" build_id=build-20250314-0042 env=staging passed=5 failed=0 duration=2.781s
+time=2025-03-14T09:01:47.900Z level=info component=pipeline msg="staging validation complete" build_id=build-20250314-0042 env=staging awaiting_approval=true
+time=2025-03-14T09:14:22.001Z level=info component=pipeline msg="production promotion approved" build_id=build-20250314-0042 approved_by=bob@acme.com
+time=2025-03-14T09:14:22.112Z level=info component=deployer msg="deploying to production" build_id=build-20250314-0042 env=production image="registry.acme.internal/platform/api:v2.7.1" replicas=6 strategy=rolling max_unavailable=1
+time=2025-03-14T09:14:25.441Z level=info component=deployer msg="rolling update in progress" build_id=build-20250314-0042 env=production updated=2 ready=2 available=6
+time=2025-03-14T09:14:29.003Z level=info component=deployer msg="rolling update in progress" build_id=build-20250314-0042 env=production updated=4 ready=4 available=6
+time=2025-03-14T09:14:32.881Z level=info component=deployer msg="rolling update in progress" build_id=build-20250314-0042 env=production updated=6 ready=6 available=6
+time=2025-03-14T09:14:33.001Z level=info component=deployer msg="deployment complete" build_id=build-20250314-0042 env=production replicas=6 healthy=6 version=v2.7.1 duration=10.889s
+time=2025-03-14T09:14:45.001Z level=warn component=monitor msg="error rate elevated post-deploy" env=production version=v2.7.1 error_rate=0.031 threshold=0.01 window=60s
+time=2025-03-14T09:14:45.112Z level=error component=monitor msg="p99 latency spike detected" env=production version=v2.7.1 p99_ms=1847 baseline_ms=210 window=60s
+time=2025-03-14T09:14:46.001Z level=error component=pipeline msg="production health check failed" build_id=build-20250314-0042 env=production checks_failed=2 auto_rollback=true
+time=2025-03-14T09:14:46.201Z level=warn component=deployer msg="initiating rollback" build_id=build-20250314-0042 env=production from=v2.7.1 to=v2.6.9
+time=2025-03-14T09:14:49.441Z level=info component=deployer msg="rollback in progress" build_id=build-20250314-0042 env=production updated=3 ready=3 available=6
+time=2025-03-14T09:14:52.778Z level=info component=deployer msg="rollback complete" build_id=build-20250314-0042 env=production version=v2.6.9 replicas=6 healthy=6 duration=6.577s
+time=2025-03-14T09:15:01.003Z level=info component=monitor msg="error rate normalized" env=production version=v2.6.9 error_rate=0.002 window=60s
+time=2025-03-14T09:15:02.001Z level=info component=monitor msg="p99 latency normalized" env=production version=v2.6.9 p99_ms=198 window=60s
+time=2025-03-14T09:15:10.441Z level=info component=notifier msg="alert resolved" env=production alert="HighErrorRate" duration=25s
+time=2025-03-14T09:15:10.882Z level=info component=notifier msg="alert resolved" env=production alert="HighP99Latency" duration=25s
+time=2025-03-14T09:15:11.001Z level=warn component=pipeline msg="creating incident report" build_id=build-20250314-0042 version=v2.7.1 reason="automatic rollback triggered"
+time=2025-03-14T09:15:01.112Z level=info component=pipeline msg="pipeline finished" build_id=build-20250314-0042 result=rolled_back version=v2.7.1 stable_version=v2.6.9 duration=15m01s
