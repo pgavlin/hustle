@@ -9,7 +9,22 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+var regexpCache sync.Map // string → *regexp.Regexp
+
+func cachedCompileRegexp(pattern string) (*regexp.Regexp, error) {
+	if v, ok := regexpCache.Load(pattern); ok {
+		return v.(*regexp.Regexp), nil
+	}
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return nil, err
+	}
+	regexpCache.Store(pattern, re)
+	return re, nil
+}
 
 func registerBuiltins(env *Environment) {
 	// Filters
@@ -558,7 +573,7 @@ func builtinTest(input Value, args []Node, env *Environment) iter.Seq[Value] {
 			if !ok {
 				return
 			}
-			re, err := regexp.Compile(pat)
+			re, err := cachedCompileRegexp(pat)
 			if err != nil {
 				yield(Value{Shape: BoolShape{}, Data: false})
 				return

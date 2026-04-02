@@ -38,6 +38,7 @@ type Model struct {
 	jqFilter   *filterpkg.JQFilter
 	jqExpr     string
 	view       appView
+	gridReady  bool
 	width      int
 	height     int
 }
@@ -59,16 +60,24 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m *Model) rebuildGrid() {
-	reserved := 1 // status bar
-	if m.view == viewJQInput {
-		reserved = 2 // input + error line
-	}
-	gridHeight := m.height - reserved
 	var extFilter func(logpkg.LogRecord) bool
 	if m.jqFilter != nil {
 		extFilter = m.jqFilter.Match
 	}
-	m.grid = newLogGrid(m.records, m.width, gridHeight, extFilter)
+	m.grid = newLogGrid(m.records, m.width, m.gridHeight(), extFilter)
+}
+
+func (m *Model) resizeGrid() {
+	m.grid.SetWidth(m.width)
+	m.grid.SetHeight(m.gridHeight())
+}
+
+func (m *Model) gridHeight() int {
+	reserved := 1 // status bar
+	if m.view == viewJQInput {
+		reserved = 2 // input + error line
+	}
+	return m.height - reserved
 }
 
 // Update implements tea.Model.
@@ -77,14 +86,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.rebuildGrid()
+		if !m.gridReady {
+			m.rebuildGrid()
+			m.gridReady = true
+		} else {
+			m.resizeGrid()
+		}
 		m.detail.SetSize(m.width, m.height)
 		return m, nil
 
 	case jqResult:
 		if msg.cancelled {
 			m.view = viewGrid
-			m.rebuildGrid()
+			m.resizeGrid()
 			return m, nil
 		}
 		expr := msg.expr
@@ -132,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.view == viewGrid {
 				m.jqInput = NewJQInputModel(m.jqExpr, m.width, m.inputShape)
 				m.view = viewJQInput
-				m.rebuildGrid()
+				m.resizeGrid()
 				return m, nil
 			}
 		}

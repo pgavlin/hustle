@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime/pprof"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -25,6 +26,10 @@ func main() {
 				Value:   "auto",
 				Usage:   fmt.Sprintf("Log format: auto, %s", strings.Join(logpkg.FormatNames(), ", ")),
 			},
+			&cli.StringFlag{
+				Name:  "cpuprofile",
+				Usage: fmt.Sprintf("Set to a path to capture a CPU profile to that path."),
+			},
 		},
 		Action: run,
 	}
@@ -36,6 +41,19 @@ func main() {
 }
 
 func run(ctx context.Context, cmd *cli.Command) error {
+	if cpuProfile := cmd.String("cpuprofile"); cpuProfile != "" {
+		f, err := os.Create(cpuProfile)
+		if err != nil {
+			return fmt.Errorf("creating CPU profile: %w", err)
+		}
+		defer f.Close()
+
+		if err = pprof.StartCPUProfile(f); err != nil {
+			return fmt.Errorf("starting CPU profile: %w", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
 	var format logpkg.Format
 	if name := cmd.String("format"); name != "auto" {
 		format = logpkg.FormatByName(name)

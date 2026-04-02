@@ -11,6 +11,7 @@ import (
 // JQFilter is a compiled jq expression that can test LogRecords.
 type JQFilter struct {
 	node jq.Node
+	env  *jq.Environment
 }
 
 // Compile parses and compiles a jq expression.
@@ -19,7 +20,7 @@ func Compile(expr string) (*JQFilter, error) {
 	if len(errs) > 0 {
 		return nil, fmt.Errorf("%s", errs[0])
 	}
-	return &JQFilter{node: node}, nil
+	return &JQFilter{node: node, env: jq.DefaultEnv()}, nil
 }
 
 // Match evaluates the jq expression against a LogRecord.
@@ -27,7 +28,7 @@ func Compile(expr string) (*JQFilter, error) {
 // Returns false if the expression produces false, null, empty output, or errors.
 func (f *JQFilter) Match(rec logpkg.LogRecord) bool {
 	input := jq.ConcreteValue(recordToMap(rec))
-	for v := range jq.Eval(f.node, input, jq.DefaultEnv()) {
+	for v := range jq.Eval(f.node, input, f.env) {
 		switch d := v.Data.(type) {
 		case nil:
 			return false
