@@ -1,11 +1,12 @@
 package log
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
 	"strings"
 	"time"
+	"unsafe"
+
+	"github.com/segmentio/encoding/json"
 )
 
 // JSONFormat parses JSON log lines, auto-detecting common field name variants
@@ -16,13 +17,17 @@ func (f *JSONFormat) Name() string { return "json" }
 
 func (f *JSONFormat) ParseRecord(line string) (LogRecord, error) {
 	var raw map[string]any
-	if err := json.Unmarshal([]byte(line), &raw); err != nil {
-		return LogRecord{}, fmt.Errorf("invalid JSON: %w", err)
+
+	// Zero-copy parse: get a []byte view of the string without copying,
+	// then use DontCopyString so decoded strings reference the original line.
+	b := unsafe.Slice(unsafe.StringData(line), len(line))
+	if _, err := json.Parse(b, &raw, json.DontCopyString|json.DontCopyNumber); err != nil {
+		return LogRecord{}, err
 	}
 
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any),
+		Attrs:   make(map[string]any, len(raw)),
 	}
 
 	// Extract time from known field names
@@ -80,11 +85,23 @@ func parseTime(v any) time.Time {
 	return time.Time{}
 }
 
+func isUpperASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 'a' && s[i] <= 'z' {
+			return false
+		}
+	}
+	return true
+}
+
 // parseLevel normalizes level values to uppercase strings.
 // Handles string levels and bunyan numeric levels.
 func parseLevel(v any) string {
 	switch v := v.(type) {
 	case string:
+		if isUpperASCII(v) {
+			return v
+		}
 		return strings.ToUpper(v)
 	case float64:
 		// Bunyan numeric levels

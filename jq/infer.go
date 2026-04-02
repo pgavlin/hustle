@@ -2,7 +2,6 @@ package jq
 
 import (
 	"fmt"
-	"time"
 
 	logpkg "github.com/pgavlin/hustle/log"
 )
@@ -26,10 +25,9 @@ func InferShape(records []logpkg.LogRecord) Shape {
 	}}
 
 	for _, rec := range records {
-		// Track standard field values
+		// Track level values (small cardinality, useful for enum).
+		// Skip time and msg — always high cardinality.
 		trackValue(fieldValues, "level", rec.Level)
-		trackValue(fieldValues, "time", rec.Time.Format(time.RFC3339Nano))
-		trackValue(fieldValues, "msg", rec.Msg)
 
 		for k, v := range rec.Attrs {
 			s := inferValue(v)
