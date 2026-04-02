@@ -11,7 +11,7 @@ import (
 var (
 	jqPromptStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12"))
 	jqErrorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	jqDocStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
+	jqDocStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("248")).Italic(true)
 )
 
 // jqResult is sent when the user confirms or cancels the jq input.
