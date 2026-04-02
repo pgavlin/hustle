@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 	"runtime/pprof"
 	"strings"
 
@@ -28,7 +29,11 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "cpuprofile",
-				Usage: fmt.Sprintf("Set to a path to capture a CPU profile to that path."),
+				Usage: "Write CPU profile to this path",
+			},
+			&cli.StringFlag{
+				Name:  "memprofile",
+				Usage: "Write memory profile to this path on exit",
 			},
 		},
 		Action: run,
@@ -80,5 +85,18 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	m := ui.New(records, skipped, detected.Name())
 	p := tea.NewProgram(m)
 	_, err = p.Run()
+
+	if memProfile := cmd.String("memprofile"); memProfile != "" {
+		runtime.GC()
+		f, ferr := os.Create(memProfile)
+		if ferr != nil {
+			return fmt.Errorf("creating memory profile: %w", ferr)
+		}
+		defer f.Close()
+		if ferr = pprof.WriteHeapProfile(f); ferr != nil {
+			return fmt.Errorf("writing memory profile: %w", ferr)
+		}
+	}
+
 	return err
 }
