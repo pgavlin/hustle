@@ -11,6 +11,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.20
 	github.com/pgavlin/tea-grid v0.0.0-20260327132424-9938968f270e
 	github.com/rivo/uniseg v0.4.7
+	github.com/urfave/cli/v3 v3.8.0
 )
 
 require (
