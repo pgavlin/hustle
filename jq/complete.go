@@ -57,10 +57,15 @@ func Complete(expr string, cursorPos int, inputShape Shape) []Suggestion {
 	prefix := expr[:tokenStart]
 
 	if token == "" {
+		// Don't suggest after positions where an expression just ended —
+		// field names and builtins aren't valid after closing quotes,
+		// parens, brackets, digits, etc.
+		if cursorPos > 0 && isExprTerminator(expr[cursorPos-1]) {
+			return nil
+		}
+
 		// Check if we're in a value position (RHS of comparison) with enum values.
-		// But don't suggest if cursor is right after a closing quote (value already entered).
-		rightAfterQuote := cursorPos > 0 && expr[cursorPos-1] == '"'
-		if ctx.valueShape != nil && !rightAfterQuote {
+		if ctx.valueShape != nil {
 			if vals := EnumValues(ctx.valueShape); vals != nil {
 				for _, v := range vals {
 					suggestions = append(suggestions, Suggestion{Text: prefix + formatValue(v)})
@@ -305,6 +310,18 @@ func evalContextAtCursor(node Node, input Shape, cursor int) completionContext {
 	default:
 		return completionContext{shape: input}
 	}
+}
+
+// isExprTerminator returns true if the character ends an expression —
+// meaning a new field name or builtin is not valid immediately after it.
+func isExprTerminator(ch byte) bool {
+	switch ch {
+	case '"', ')', ']', '}':
+		return true
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return true
+	}
+	return false
 }
 
 func isComparisonOp(op string) bool {
