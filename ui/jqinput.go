@@ -2,9 +2,13 @@
 package ui
 
 import (
+	"sort"
+
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+
+	logpkg "github.com/pgavlin/hustle/log"
 )
 
 var (
@@ -25,11 +29,54 @@ type JQInputModel struct {
 	width int
 }
 
+// jq builtins worth suggesting.
+var jqBuiltins = []string{
+	"select(",
+	"test(",
+	"startswith(",
+	"endswith(",
+	"contains(",
+	"length",
+	"keys",
+	"values",
+	"type",
+	"not",
+	"empty",
+	"map(",
+	"map_values(",
+	"to_entries",
+	"from_entries",
+	"ascii_downcase",
+	"ascii_upcase",
+	"split(",
+	"join(",
+	"tonumber",
+	"tostring",
+}
+
+// collectSuggestions builds a suggestion list from field names and jq builtins.
+func collectSuggestions(records []logpkg.LogRecord) []string {
+	seen := map[string]bool{".time": true, ".level": true, ".msg": true}
+	for _, rec := range records {
+		for k := range rec.Attrs {
+			seen["."+k] = true
+		}
+	}
+	fields := make([]string, 0, len(seen))
+	for k := range seen {
+		fields = append(fields, k)
+	}
+	sort.Strings(fields)
+	return append(fields, jqBuiltins...)
+}
+
 // NewJQInputModel creates a new jq input modal with the given initial expression.
-func NewJQInputModel(initialExpr string, width int) JQInputModel {
+func NewJQInputModel(initialExpr string, width int, records []logpkg.LogRecord) JQInputModel {
 	ti := textinput.New()
 	ti.Placeholder = "jq expression (e.g. select(.level == \"ERROR\"))"
 	ti.SetValue(initialExpr)
+	ti.ShowSuggestions = true
+	ti.SetSuggestions(collectSuggestions(records))
 	ti.Focus()
 	return JQInputModel{
 		input: ti,

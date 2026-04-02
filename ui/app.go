@@ -125,7 +125,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "j":
 			if m.view == viewGrid {
-				m.jqInput = NewJQInputModel(m.jqExpr, m.width)
+				m.jqInput = NewJQInputModel(m.jqExpr, m.width, m.records)
 				m.view = viewJQInput
 				m.rebuildGrid()
 				return m, nil
