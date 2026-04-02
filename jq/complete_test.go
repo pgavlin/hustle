@@ -4,11 +4,11 @@ import "testing"
 
 func testShape() Shape {
 	return ObjectShape{Fields: map[string]Shape{
-		"time":    StringShape{},
-		"level":   StringShape{},
-		"msg":     StringShape{},
-		"port":    NumberShape{},
-		"host":    StringShape{},
+		"time":  StringShape{},
+		"level": EnumShape{Inner: StringShape{}, Values: []any{"DEBUG", "INFO", "WARN", "ERROR"}},
+		"msg":   StringShape{},
+		"port":  NumberShape{},
+		"host":  StringShape{},
 		"headers": ObjectShape{Fields: map[string]Shape{
 			"content-type": StringShape{},
 			"accept":       StringShape{},
@@ -106,6 +106,40 @@ func TestComplete_NestedField(t *testing.T) {
 	suggestions := Complete(expr, len(expr), testShape())
 	if !containsSuggestion(suggestions, ".headers.content-type") {
 		t.Errorf("expected .headers.content-type, got %v", suggestions)
+	}
+}
+
+func TestComplete_ValueSuggestion(t *testing.T) {
+	// .level == <cursor> should suggest enum values
+	expr := `.level == `
+	suggestions := Complete(expr, len(expr), testShape())
+	if !containsSuggestion(suggestions, `.level == "ERROR"`) {
+		t.Errorf("expected \"ERROR\" value suggestion, got %v", suggestions)
+	}
+	if !containsSuggestion(suggestions, `.level == "INFO"`) {
+		t.Errorf("expected \"INFO\" value suggestion, got %v", suggestions)
+	}
+}
+
+func TestComplete_ValueSuggestionPartial(t *testing.T) {
+	// .level == "E should suggest "ERROR"
+	expr := `.level == "E`
+	suggestions := Complete(expr, len(expr), testShape())
+	if !containsSuggestion(suggestions, `.level == "ERROR"`) {
+		t.Errorf("expected \"ERROR\" for partial, got %v", suggestions)
+	}
+	if containsSuggestion(suggestions, `.level == "INFO"`) {
+		t.Error("should not suggest INFO for \"E prefix")
+	}
+}
+
+func TestComplete_NoValueForNonEnum(t *testing.T) {
+	// .msg == <cursor> should not suggest values (msg has no enum)
+	expr := `.msg == `
+	suggestions := Complete(expr, len(expr), testShape())
+	// Should fall back to regular suggestions (fields/builtins), not enum values
+	if containsSuggestion(suggestions, `.msg == "ERROR"`) {
+		t.Error("should not suggest enum values for non-enum field")
 	}
 }
 

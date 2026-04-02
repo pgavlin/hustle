@@ -16,6 +16,13 @@ type NullShape struct{}
 type AnyShape struct{}
 type UnionShape struct{ Alternatives []Shape }
 
+// EnumShape wraps an inner Shape with a known set of values.
+// Used when a field has a small number of distinct observed values.
+type EnumShape struct {
+	Inner  Shape
+	Values []any // distinct observed values (strings, numbers, etc.)
+}
+
 func (ObjectShape) shape() {}
 func (ArrayShape) shape()  {}
 func (StringShape) shape() {}
@@ -24,6 +31,7 @@ func (BoolShape) shape()   {}
 func (NullShape) shape()   {}
 func (AnyShape) shape()    {}
 func (UnionShape) shape()  {}
+func (EnumShape) shape()   {}
 
 // Value is the unified value type for both symbolic and concrete evaluation.
 // When Unknown is true, only Shape is meaningful (symbolic mode).
@@ -94,9 +102,32 @@ func (v Value) Truthy() bool {
 	}
 }
 
+// EnumValues returns the known values for an EnumShape, or nil for other shapes.
+func EnumValues(s Shape) []any {
+	switch s := s.(type) {
+	case EnumShape:
+		return s.Values
+	case UnionShape:
+		for _, alt := range s.Alternatives {
+			if vals := EnumValues(alt); vals != nil {
+				return vals
+			}
+		}
+	}
+	return nil
+}
+
+// InnerShape unwraps EnumShape to get the underlying type shape.
+func InnerShape(s Shape) Shape {
+	if e, ok := s.(EnumShape); ok {
+		return e.Inner
+	}
+	return s
+}
+
 // FieldNames returns sorted field names from an ObjectShape, or nil for other shapes.
 func FieldNames(s Shape) []string {
-	s = unwrapUnion(s)
+	s = InnerShape(unwrapUnion(s))
 	switch s := s.(type) {
 	case ObjectShape:
 		names := make([]string, 0, len(s.Fields))
@@ -129,7 +160,7 @@ func FieldNames(s Shape) []string {
 
 // LookupField looks up a field in a shape. Returns AnyShape if not found or non-object.
 func LookupField(s Shape, name string) Shape {
-	s = unwrapUnion(s)
+	s = InnerShape(unwrapUnion(s))
 	switch s := s.(type) {
 	case ObjectShape:
 		if f, ok := s.Fields[name]; ok {
@@ -166,6 +197,34 @@ func Merge(a, b Shape) Shape {
 	}
 	if _, ok := b.(AnyShape); ok {
 		return a
+	}
+
+	// Unwrap EnumShapes and merge their value sets if inner types match
+	ae, aIsEnum := a.(EnumShape)
+	be, bIsEnum := b.(EnumShape)
+	if aIsEnum || bIsEnum {
+		innerA, valsA := a, []any(nil)
+		if aIsEnum {
+			innerA, valsA = ae.Inner, ae.Values
+		}
+		innerB, valsB := b, []any(nil)
+		if bIsEnum {
+			innerB, valsB = be.Inner, be.Values
+		}
+		merged := Merge(innerA, innerB)
+		// If both had values, combine them
+		if valsA != nil && valsB != nil {
+			combined := mergeValues(valsA, valsB)
+			return EnumShape{Inner: merged, Values: combined}
+		}
+		// If only one side had values, preserve them
+		if valsA != nil {
+			return EnumShape{Inner: merged, Values: valsA}
+		}
+		if valsB != nil {
+			return EnumShape{Inner: merged, Values: valsB}
+		}
+		return merged
 	}
 
 	switch a := a.(type) {
@@ -207,6 +266,25 @@ func Merge(a, b Shape) Shape {
 	}
 
 	return union(a, b)
+}
+
+// mergeValues combines two value slices, deduplicating.
+func mergeValues(a, b []any) []any {
+	seen := make(map[any]bool, len(a)+len(b))
+	var result []any
+	for _, v := range a {
+		if !seen[v] {
+			seen[v] = true
+			result = append(result, v)
+		}
+	}
+	for _, v := range b {
+		if !seen[v] {
+			seen[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
 }
 
 func union(shapes ...Shape) Shape {
