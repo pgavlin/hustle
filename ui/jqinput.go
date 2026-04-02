@@ -1,14 +1,11 @@
-// ui/jqinput.go
 package ui
 
 import (
-	"sort"
-
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
 
-	logpkg "github.com/pgavlin/hustle/log"
+	"github.com/pgavlin/hustle/jq"
 )
 
 var (
@@ -25,63 +22,26 @@ type jqResult struct {
 // JQInputModel is a modal text input for entering jq expressions.
 type JQInputModel struct {
 	input textinput.Model
+	shape jq.Shape
 	err   string
 	width int
 }
 
-// jq builtins worth suggesting.
-var jqBuiltins = []string{
-	"select(",
-	"test(",
-	"startswith(",
-	"endswith(",
-	"contains(",
-	"length",
-	"keys",
-	"values",
-	"type",
-	"not",
-	"empty",
-	"map(",
-	"map_values(",
-	"to_entries",
-	"from_entries",
-	"ascii_downcase",
-	"ascii_upcase",
-	"split(",
-	"join(",
-	"tonumber",
-	"tostring",
-}
-
-// collectSuggestions builds a suggestion list from field names and jq builtins.
-func collectSuggestions(records []logpkg.LogRecord) []string {
-	seen := map[string]bool{".time": true, ".level": true, ".msg": true}
-	for _, rec := range records {
-		for k := range rec.Attrs {
-			seen["."+k] = true
-		}
-	}
-	fields := make([]string, 0, len(seen))
-	for k := range seen {
-		fields = append(fields, k)
-	}
-	sort.Strings(fields)
-	return append(fields, jqBuiltins...)
-}
-
 // NewJQInputModel creates a new jq input modal with the given initial expression.
-func NewJQInputModel(initialExpr string, width int, records []logpkg.LogRecord) JQInputModel {
+func NewJQInputModel(initialExpr string, width int, shape jq.Shape) JQInputModel {
 	ti := textinput.New()
 	ti.Placeholder = "jq expression (e.g. select(.level == \"ERROR\"))"
 	ti.SetValue(initialExpr)
 	ti.ShowSuggestions = true
-	ti.SetSuggestions(collectSuggestions(records))
 	ti.Focus()
-	return JQInputModel{
+
+	m := JQInputModel{
 		input: ti,
+		shape: shape,
 		width: width,
 	}
+	m.updateSuggestions()
+	return m
 }
 
 // SetError displays an error message below the input.
@@ -92,6 +52,13 @@ func (m *JQInputModel) SetError(errMsg string) {
 // Value returns the current input text.
 func (m JQInputModel) Value() string {
 	return m.input.Value()
+}
+
+func (m *JQInputModel) updateSuggestions() {
+	value := m.input.Value()
+	pos := m.input.Position()
+	suggestions := jq.Complete(value, pos, m.shape)
+	m.input.SetSuggestions(suggestions)
 }
 
 // Update handles messages for the jq input modal.
@@ -111,6 +78,7 @@ func (m JQInputModel) Update(msg tea.Msg) (JQInputModel, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	m.input, cmd = m.input.Update(msg)
+	m.updateSuggestions()
 	return m, cmd
 }
 

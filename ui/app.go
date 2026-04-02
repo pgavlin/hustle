@@ -9,6 +9,7 @@ import (
 	"github.com/pgavlin/tea-grid/grid"
 
 	filterpkg "github.com/pgavlin/hustle/filter"
+	"github.com/pgavlin/hustle/jq"
 	logpkg "github.com/pgavlin/hustle/log"
 )
 
@@ -27,24 +28,26 @@ var statusBarStyle = lipgloss.NewStyle().
 
 // Model is the top-level bubbletea model for hustle.
 type Model struct {
-	records  []logpkg.LogRecord
-	skipped  int
-	grid     grid.Model[logpkg.LogRecord]
-	detail   DetailModel
-	jqInput  JQInputModel
-	jqFilter *filterpkg.JQFilter
-	jqExpr   string
-	view     appView
-	width    int
-	height   int
+	records    []logpkg.LogRecord
+	skipped    int
+	inputShape jq.Shape
+	grid       grid.Model[logpkg.LogRecord]
+	detail     DetailModel
+	jqInput    JQInputModel
+	jqFilter   *filterpkg.JQFilter
+	jqExpr     string
+	view       appView
+	width      int
+	height     int
 }
 
 // New creates the top-level model with loaded records.
 func New(records []logpkg.LogRecord, skipped int) Model {
 	return Model{
-		records: records,
-		skipped: skipped,
-		view:    viewGrid,
+		records:    records,
+		skipped:    skipped,
+		inputShape: jq.InferShape(records),
+		view:       viewGrid,
 	}
 }
 
@@ -125,7 +128,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "j":
 			if m.view == viewGrid {
-				m.jqInput = NewJQInputModel(m.jqExpr, m.width, m.records)
+				m.jqInput = NewJQInputModel(m.jqExpr, m.width, m.inputShape)
 				m.view = viewJQInput
 				m.rebuildGrid()
 				return m, nil
