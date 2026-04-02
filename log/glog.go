@@ -27,9 +27,18 @@ var glogRegex = regexp.MustCompile(
 )
 
 func (f *GlogFormat) ParseRecord(line string) (LogRecord, error) {
-	m := glogRegex.FindStringSubmatch(line)
-	if m == nil {
+	idx := glogRegex.FindStringSubmatchIndex(line)
+	if idx == nil {
 		return LogRecord{}, fmt.Errorf("not a glog log line")
+	}
+
+	// Helper to extract submatch group n from index pairs.
+	sub := func(n int) string {
+		start, end := idx[2*n], idx[2*n+1]
+		if start < 0 {
+			return ""
+		}
+		return line[start:end]
 	}
 
 	rec := LogRecord{
@@ -38,24 +47,24 @@ func (f *GlogFormat) ParseRecord(line string) (LogRecord, error) {
 	}
 
 	// Level
-	rec.Level = glogLevels[m[1][0]]
+	rec.Level = glogLevels[sub(1)[0]]
 
 	// Time: parse date (mmdd or yyyymmdd) + time
-	rec.Time = parseGlogTime(m[2], m[3])
+	rec.Time = parseGlogTime(sub(2), sub(3))
 
 	// Thread ID
-	if tid, err := strconv.ParseFloat(m[4], 64); err == nil {
+	if tid, err := strconv.ParseFloat(sub(4), 64); err == nil {
 		rec.Attrs["thread_id"] = tid
 	}
 
 	// Source location
-	rec.Attrs["file"] = m[5]
-	if lineNo, err := strconv.ParseFloat(m[6], 64); err == nil {
+	rec.Attrs["file"] = sub(5)
+	if lineNo, err := strconv.ParseFloat(sub(6), 64); err == nil {
 		rec.Attrs["line"] = lineNo
 	}
 
 	// Message — check for klog structured format: "quoted msg" key=val key=val
-	rec.Msg = m[7]
+	rec.Msg = sub(7)
 	parseKlogStructuredMessage(&rec)
 
 	return rec, nil

@@ -23,9 +23,17 @@ var clfRegex = regexp.MustCompile(
 )
 
 func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
-	m := clfRegex.FindStringSubmatch(line)
-	if m == nil {
+	idx := clfRegex.FindStringSubmatchIndex(line)
+	if idx == nil {
 		return LogRecord{}, fmt.Errorf("not a CLF log line")
+	}
+
+	sub := func(n int) string {
+		start, end := idx[2*n], idx[2*n+1]
+		if start < 0 {
+			return ""
+		}
+		return line[start:end]
 	}
 
 	rec := LogRecord{
@@ -34,15 +42,15 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 	}
 
 	// Parse time
-	if t, err := time.Parse(clfTimeLayout, m[4]); err == nil {
+	if t, err := time.Parse(clfTimeLayout, sub(4)); err == nil {
 		rec.Time = t
 	}
 
 	// Request line is the message
-	rec.Msg = m[5]
+	rec.Msg = sub(5)
 
 	// Status code determines level
-	status, _ := strconv.Atoi(m[6])
+	status, _ := strconv.Atoi(sub(6))
 	switch {
 	case status >= 500:
 		rec.Level = "ERROR"
@@ -53,22 +61,22 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 	}
 
 	// Parse request line into method, path, protocol
-	parseRequestLine(m[5], rec.Attrs)
+	parseRequestLine(sub(5), rec.Attrs)
 
 	// Attrs
-	rec.Attrs["remote_addr"] = m[1]
-	if m[3] != "-" {
-		rec.Attrs["user"] = m[3]
+	rec.Attrs["remote_addr"] = sub(1)
+	if u := sub(3); u != "-" {
+		rec.Attrs["user"] = u
 	}
 	rec.Attrs["status"] = float64(status)
-	if bytes, err := strconv.ParseFloat(m[7], 64); err == nil {
+	if bytes, err := strconv.ParseFloat(sub(7), 64); err == nil {
 		rec.Attrs["bytes"] = bytes
 	}
-	if m[8] != "" && m[8] != "-" {
-		rec.Attrs["referer"] = m[8]
+	if r := sub(8); r != "" && r != "-" {
+		rec.Attrs["referer"] = r
 	}
-	if m[9] != "" {
-		rec.Attrs["user_agent"] = m[9]
+	if ua := sub(9); ua != "" {
+		rec.Attrs["user_agent"] = ua
 	}
 
 	return rec, nil

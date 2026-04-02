@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/pgavlin/tea-grid/data"
@@ -68,9 +69,14 @@ func newLogGrid(records []logpkg.LogRecord, width, height int, extFilter func(lo
 	opts := []grid.Option[logpkg.LogRecord]{
 		grid.WithColumns(logColumns()),
 		grid.WithRows(records),
-		grid.WithRowID(func(r logpkg.LogRecord) string {
-			return fmt.Sprintf("%d-%s-%s", r.Time.UnixNano(), r.Level, r.Msg)
-		}),
+		grid.WithRowID(func() func(logpkg.LogRecord) string {
+			i := 0
+			return func(r logpkg.LogRecord) string {
+				id := strconv.Itoa(i)
+				i++
+				return id
+			}
+		}()),
 		grid.WithWidth[logpkg.LogRecord](width),
 		grid.WithHeight[logpkg.LogRecord](height),
 		grid.WithSelection[logpkg.LogRecord](selection.SelectSingle),
