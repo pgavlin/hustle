@@ -54,7 +54,11 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m *Model) rebuildGrid() {
-	gridHeight := m.height - 1
+	reserved := 1 // status bar
+	if m.view == viewJQInput {
+		reserved = 2 // input + error line
+	}
+	gridHeight := m.height - reserved
 	var extFilter func(logpkg.LogRecord) bool
 	if m.jqFilter != nil {
 		extFilter = m.jqFilter.Match
@@ -75,6 +79,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case jqResult:
 		if msg.cancelled {
 			m.view = viewGrid
+			m.rebuildGrid()
 			return m, nil
 		}
 		expr := msg.expr
@@ -122,6 +127,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.view == viewGrid {
 				m.jqInput = NewJQInputModel(m.jqExpr, m.width)
 				m.view = viewJQInput
+				m.rebuildGrid()
 				return m, nil
 			}
 		}
