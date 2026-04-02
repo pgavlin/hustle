@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
@@ -33,6 +34,11 @@ func NewJQInputModel(initialExpr string, width int, shape jq.Shape) JQInputModel
 	ti.Placeholder = "jq expression (e.g. select(.level == \"ERROR\"))"
 	ti.SetValue(initialExpr)
 	ti.ShowSuggestions = true
+	km := textinput.DefaultKeyMap()
+	km.NextSuggestion = key.NewBinding(key.WithKeys("tab"))
+	km.AcceptSuggestion = key.NewBinding(key.WithKeys("shift+tab"))
+	km.PrevSuggestion = key.NewBinding(key.WithKeys("shift+tab"))
+	ti.KeyMap = km
 	ti.Focus()
 
 	m := JQInputModel{
