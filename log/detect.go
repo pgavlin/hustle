@@ -8,11 +8,14 @@ import (
 )
 
 // Formats is the registry of known formats, in auto-detection priority order.
+// Formats is the registry of known formats, in auto-detection priority order.
+// More specific formats (JSON, glog, CLF) are tried before the permissive
+// logfmt parser, which accepts almost anything with key=value pairs.
 var Formats = []Format{
 	&JSONFormat{},
-	&LogfmtFormat{},
 	&GlogFormat{},
 	&CLFFormat{},
+	&LogfmtFormat{},
 }
 
 // FormatByName returns the format with the given name, or nil.
