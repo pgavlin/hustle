@@ -12,13 +12,15 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "usage: hustle <logfile>\n")
-		os.Exit(1)
-	}
+	var records []logpkg.LogRecord
+	var skipped int
+	var err error
 
-	path := os.Args[1]
-	records, skipped, err := logpkg.Load(path)
+	if len(os.Args) >= 2 {
+		records, skipped, err = logpkg.Load(os.Args[1])
+	} else {
+		records, skipped, err = logpkg.LoadReader(os.Stdin)
+	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)

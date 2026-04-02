@@ -3,6 +3,7 @@ package log
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -15,10 +16,14 @@ func Load(path string) ([]LogRecord, int, error) {
 		return nil, 0, fmt.Errorf("open %s: %w", path, err)
 	}
 	defer f.Close()
+	return LoadReader(f)
+}
 
+// LoadReader reads log lines from an io.Reader.
+func LoadReader(r io.Reader) ([]LogRecord, int, error) {
 	var records []LogRecord
 	skipped := 0
-	scanner := bufio.NewScanner(f)
+	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -34,7 +39,7 @@ func Load(path string) ([]LogRecord, int, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, 0, fmt.Errorf("read %s: %w", path, err)
+		return nil, 0, fmt.Errorf("read: %w", err)
 	}
 
 	return records, skipped, nil
