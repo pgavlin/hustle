@@ -64,7 +64,6 @@ func (m JQInputModel) Update(msg tea.Msg) (JQInputModel, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	m.input, cmd = m.input.Update(msg)
-	m.err = "" // clear error on new input
 	return m, cmd
 }
 
