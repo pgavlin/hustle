@@ -1,0 +1,70 @@
+package log
+
+import (
+	"fmt"
+	"regexp"
+	"strconv"
+	"time"
+)
+
+type CLFFormat struct{}
+
+func (f *CLFFormat) Name() string { return "clf" }
+
+// CLF time format: [02/Jan/2006:15:04:05 -0700]
+const clfTimeLayout = "02/Jan/2006:15:04:05 -0700"
+
+// Combined Log Format regex
+// Groups: 1=remote_addr, 2=ident, 3=user, 4=time, 5=request, 6=status, 7=bytes, 8=referer, 9=user_agent
+var clfRegex = regexp.MustCompile(
+	`^(\S+) (\S+) (\S+) \[([^\]]+)\] "([^"]*)" (\d{3}) (\S+)(?: "([^"]*)" "([^"]*)")?`,
+)
+
+func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
+	m := clfRegex.FindStringSubmatch(line)
+	if m == nil {
+		return LogRecord{}, fmt.Errorf("not a CLF log line")
+	}
+
+	rec := LogRecord{
+		RawJSON: line,
+		Attrs:   make(map[string]any),
+	}
+
+	// Parse time
+	if t, err := time.Parse(clfTimeLayout, m[4]); err == nil {
+		rec.Time = t
+	}
+
+	// Request line is the message
+	rec.Msg = m[5]
+
+	// Status code determines level
+	status, _ := strconv.Atoi(m[6])
+	switch {
+	case status >= 500:
+		rec.Level = "ERROR"
+	case status >= 400:
+		rec.Level = "WARN"
+	default:
+		rec.Level = "INFO"
+	}
+
+	// Attrs
+	rec.Attrs["remote_addr"] = m[1]
+	if m[3] != "-" {
+		rec.Attrs["user"] = m[3]
+	}
+	rec.Attrs["status"] = float64(status)
+	if bytes, err := strconv.ParseFloat(m[7], 64); err == nil {
+		rec.Attrs["bytes"] = bytes
+	}
+	if m[8] != "" && m[8] != "-" {
+		rec.Attrs["referer"] = m[8]
+	}
+	if m[9] != "" {
+		rec.Attrs["user_agent"] = m[9]
+	}
+
+	return rec, nil
+}
