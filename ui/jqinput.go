@@ -70,7 +70,7 @@ func (m *JQInputModel) updateSuggestions() {
 // currentDoc returns the doc string for the current suggestion, or "".
 func (m JQInputModel) currentDoc() string {
 	idx := m.input.CurrentSuggestionIndex()
-	if idx >= len(m.suggestions) {
+	if idx < 0 || idx >= len(m.suggestions) {
 		return ""
 	}
 	s := m.suggestions[idx]
