@@ -11,6 +11,7 @@ import (
 var Formats = []Format{
 	&JSONFormat{},
 	&LogfmtFormat{},
+	&GlogFormat{},
 	&CLFFormat{},
 }
 
