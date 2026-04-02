@@ -20,7 +20,7 @@ func TestLoad_ValidFile(t *testing.T) {
 	path := writeTempFile(t, `{"time":"2024-01-15T10:30:00Z","level":"INFO","msg":"hello"}
 {"time":"2024-01-15T10:31:00Z","level":"ERROR","msg":"oops","code":500}
 `)
-	records, skipped, err := Load(path)
+	records, skipped, _, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -43,7 +43,7 @@ func TestLoad_SkipsMalformedLines(t *testing.T) {
 not json
 {"level":"WARN","msg":"also good"}
 `)
-	records, skipped, err := Load(path)
+	records, skipped, _, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -57,7 +57,7 @@ not json
 
 func TestLoad_EmptyFile(t *testing.T) {
 	path := writeTempFile(t, "")
-	records, skipped, err := Load(path)
+	records, skipped, _, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestLoad_SkipsBlankLines(t *testing.T) {
 
 {"level":"INFO","msg":"two"}
 `)
-	records, skipped, err := Load(path)
+	records, skipped, _, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -87,7 +87,7 @@ func TestLoad_SkipsBlankLines(t *testing.T) {
 }
 
 func TestLoad_FileNotFound(t *testing.T) {
-	_, _, err := Load("/nonexistent/path/to/file.log")
+	_, _, _, err := Load("/nonexistent/path/to/file.log", nil)
 	if err == nil {
 		t.Error("expected error for missing file")
 	}

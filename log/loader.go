@@ -7,30 +7,52 @@ import (
 	"os"
 )
 
-// Load reads a log file line-by-line, parsing each line as a JSON LogRecord.
-// Returns the parsed records, count of skipped (malformed) lines, and any
-// file-level error.
-func Load(path string) ([]LogRecord, int, error) {
+// Load reads a log file, auto-detecting the format or using the given one.
+// If format is nil, auto-detection is used.
+func Load(path string, format Format) ([]LogRecord, int, Format, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, 0, fmt.Errorf("open %s: %w", path, err)
+		return nil, 0, nil, fmt.Errorf("open %s: %w", path, err)
 	}
 	defer f.Close()
-	return LoadReader(f)
+	return LoadReader(f, format)
 }
 
-// LoadReader reads log lines from an io.Reader.
-func LoadReader(r io.Reader) ([]LogRecord, int, error) {
+// LoadReader reads log lines from a reader, auto-detecting the format or
+// using the given one. Returns the records, skip count, detected format,
+// and any error.
+func LoadReader(r io.Reader, format Format) ([]LogRecord, int, Format, error) {
+	var prefixLines []string
+
+	if format == nil {
+		var err error
+		format, prefixLines, err = DetectFormat(r)
+		if err != nil {
+			return nil, 0, nil, err
+		}
+	}
+
 	var records []LogRecord
 	skipped := 0
-	scanner := bufio.NewScanner(r)
 
+	// Parse pre-sampled lines first
+	for _, line := range prefixLines {
+		rec, err := format.ParseRecord(line)
+		if err != nil {
+			skipped++
+			continue
+		}
+		records = append(records, rec)
+	}
+
+	// Parse remaining lines from reader
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" {
 			continue
 		}
-		rec, err := ParseRecord(line)
+		rec, err := format.ParseRecord(line)
 		if err != nil {
 			skipped++
 			continue
@@ -39,8 +61,8 @@ func LoadReader(r io.Reader) ([]LogRecord, int, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, 0, fmt.Errorf("read: %w", err)
+		return nil, 0, nil, fmt.Errorf("read: %w", err)
 	}
 
-	return records, skipped, nil
+	return records, skipped, format, nil
 }
