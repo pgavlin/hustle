@@ -15,13 +15,25 @@ func Load(path string, format Format) ([]LogRecord, int, Format, error) {
 		return nil, 0, nil, fmt.Errorf("open %s: %w", path, err)
 	}
 	defer f.Close()
-	return LoadReader(f, format)
+
+	// Estimate record count from file size to pre-allocate the slice.
+	var sizeHint int
+	if info, err := f.Stat(); err == nil && info.Size() > 0 {
+		// Assume ~200 bytes per line as a rough average.
+		sizeHint = int(info.Size()) / 200
+	}
+
+	return loadReader(f, format, sizeHint)
 }
 
 // LoadReader reads log lines from a reader, auto-detecting the format or
 // using the given one. Returns the records, skip count, detected format,
 // and any error.
 func LoadReader(r io.Reader, format Format) ([]LogRecord, int, Format, error) {
+	return loadReader(r, format, 0)
+}
+
+func loadReader(r io.Reader, format Format, sizeHint int) ([]LogRecord, int, Format, error) {
 	// CloudWatch needs document-level parsing, not line-by-line
 	if cw, ok := format.(*CloudWatchFormat); ok {
 		_ = cw
@@ -38,7 +50,7 @@ func LoadReader(r io.Reader, format Format) ([]LogRecord, int, Format, error) {
 		}
 	}
 
-	var records []LogRecord
+	records := make([]LogRecord, 0, sizeHint)
 	skipped := 0
 
 	// Parse pre-sampled lines first
