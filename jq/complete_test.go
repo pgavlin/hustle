@@ -16,9 +16,9 @@ func testShape() Shape {
 	}}
 }
 
-func containsSuggestion(suggestions []string, want string) bool {
+func containsSuggestion(suggestions []Suggestion, want string) bool {
 	for _, s := range suggestions {
-		if s == want {
+		if s.Text == want {
 			return true
 		}
 	}
@@ -79,6 +79,28 @@ func TestComplete_BuiltinPrefix(t *testing.T) {
 	}
 }
 
+func TestComplete_BuiltinHasName(t *testing.T) {
+	suggestions := Complete("sel", 3, testShape())
+	for _, s := range suggestions {
+		if s.Text == "select(" {
+			if s.Builtin != "select" {
+				t.Errorf("expected Builtin=select, got %q", s.Builtin)
+			}
+			return
+		}
+	}
+	t.Error("select( not found in suggestions")
+}
+
+func TestComplete_FieldHasNoBuiltin(t *testing.T) {
+	suggestions := Complete(".h", 2, testShape())
+	for _, s := range suggestions {
+		if s.Builtin != "" {
+			t.Errorf("field suggestion %q should not have Builtin set, got %q", s.Text, s.Builtin)
+		}
+	}
+}
+
 func TestComplete_NestedField(t *testing.T) {
 	expr := ".headers.c"
 	suggestions := Complete(expr, len(expr), testShape())
@@ -97,8 +119,8 @@ func TestComplete_NoMatch(t *testing.T) {
 func TestComplete_FullExpressionFormat(t *testing.T) {
 	suggestions := Complete(".h", 2, testShape())
 	for _, s := range suggestions {
-		if len(s) < 2 || s[:2] != ".h" {
-			t.Errorf("suggestion %q doesn't start with .h", s)
+		if len(s.Text) < 2 || s.Text[:2] != ".h" {
+			t.Errorf("suggestion %q doesn't start with .h", s.Text)
 		}
 	}
 }

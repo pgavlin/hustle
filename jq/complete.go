@@ -1,6 +1,9 @@
 package jq
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 // completableBuiltins lists jq builtins for tab completion.
 var completableBuiltins = []string{
@@ -22,9 +25,15 @@ var completableBuiltins = []string{
 	"objects", "arrays", "strings", "numbers", "booleans", "nulls",
 }
 
+// Suggestion is a completion suggestion with optional builtin metadata.
+type Suggestion struct {
+	Text    string // full expression text for textinput
+	Builtin string // builtin name if this is a builtin suggestion, else ""
+}
+
 // Complete returns tab-completion suggestions for a jq expression at the given
 // cursor position, using symbolic evaluation to determine available fields.
-func Complete(expr string, cursorPos int, inputShape Shape) []string {
+func Complete(expr string, cursorPos int, inputShape Shape) []Suggestion {
 	if cursorPos > len(expr) {
 		cursorPos = len(expr)
 	}
@@ -37,16 +46,19 @@ func Complete(expr string, cursorPos int, inputShape Shape) []string {
 	shape := shapeAtCursor(expr, cursorPos, inputShape)
 
 	// Generate suggestions
-	var suggestions []string
+	var suggestions []Suggestion
 	prefix := expr[:tokenStart]
 
 	if token == "" {
 		// Empty — suggest both dot-fields and builtins
 		for _, name := range FieldNames(shape) {
-			suggestions = append(suggestions, prefix+"."+name)
+			suggestions = append(suggestions, Suggestion{Text: prefix + "." + name})
 		}
 		for _, b := range completableBuiltins {
-			suggestions = append(suggestions, prefix+b)
+			suggestions = append(suggestions, Suggestion{
+				Text:    prefix + b,
+				Builtin: builtinName(b),
+			})
 		}
 	} else if token[0] == '.' {
 		// Field completion
@@ -58,20 +70,30 @@ func Complete(expr string, cursorPos int, inputShape Shape) []string {
 		}
 		for _, name := range names {
 			if fieldPrefix == "" || hasPrefix(name, fieldPrefix) {
-				suggestions = append(suggestions, prefix+"."+name)
+				suggestions = append(suggestions, Suggestion{Text: prefix + "." + name})
 			}
 		}
 	} else {
 		// Builtin completion
 		for _, b := range completableBuiltins {
 			if hasPrefix(b, token) {
-				suggestions = append(suggestions, prefix+b)
+				suggestions = append(suggestions, Suggestion{
+					Text:    prefix + b,
+					Builtin: builtinName(b),
+				})
 			}
 		}
 	}
 
-	sort.Strings(suggestions)
+	sort.Slice(suggestions, func(i, j int) bool {
+		return suggestions[i].Text < suggestions[j].Text
+	})
 	return suggestions
+}
+
+// builtinName strips the trailing "(" or " " from a completable builtin string.
+func builtinName(b string) string {
+	return strings.TrimRight(b, "( ")
 }
 
 // findToken scans backwards from the end of `before` to find the completion token.

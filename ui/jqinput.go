@@ -11,6 +11,7 @@ import (
 var (
 	jqPromptStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12"))
 	jqErrorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	jqDocStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 )
 
 // jqResult is sent when the user confirms or cancels the jq input.
@@ -21,10 +22,11 @@ type jqResult struct {
 
 // JQInputModel is a modal text input for entering jq expressions.
 type JQInputModel struct {
-	input textinput.Model
-	shape jq.Shape
-	err   string
-	width int
+	input       textinput.Model
+	shape       jq.Shape
+	suggestions []jq.Suggestion
+	err         string
+	width       int
 }
 
 // NewJQInputModel creates a new jq input modal with the given initial expression.
@@ -57,8 +59,25 @@ func (m JQInputModel) Value() string {
 func (m *JQInputModel) updateSuggestions() {
 	value := m.input.Value()
 	pos := m.input.Position()
-	suggestions := jq.Complete(value, pos, m.shape)
-	m.input.SetSuggestions(suggestions)
+	m.suggestions = jq.Complete(value, pos, m.shape)
+	texts := make([]string, len(m.suggestions))
+	for i, s := range m.suggestions {
+		texts[i] = s.Text
+	}
+	m.input.SetSuggestions(texts)
+}
+
+// currentDoc returns the doc string for the current suggestion, or "".
+func (m JQInputModel) currentDoc() string {
+	idx := m.input.CurrentSuggestionIndex()
+	if idx >= len(m.suggestions) {
+		return ""
+	}
+	s := m.suggestions[idx]
+	if s.Builtin == "" {
+		return ""
+	}
+	return jq.BuiltinDoc(s.Builtin)
 }
 
 // Update handles messages for the jq input modal.
@@ -88,6 +107,8 @@ func (m JQInputModel) View() string {
 	line := prompt + m.input.View()
 	if m.err != "" {
 		line += "\n" + jqErrorStyle.Render("  error: "+m.err)
+	} else if doc := m.currentDoc(); doc != "" {
+		line += "\n" + jqDocStyle.Render("  "+doc)
 	}
 	return line
 }
