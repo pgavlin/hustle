@@ -3,7 +3,6 @@
 package textinput
 
 import (
-	"reflect"
 	"slices"
 	"strings"
 	"unicode"
@@ -876,11 +875,24 @@ func (m *Model) updateSuggestions() {
 			matches = append(matches, []rune(suggestion))
 		}
 	}
-	if !reflect.DeepEqual(matches, m.matchedSuggestions) {
-		m.currentSuggestionIndex = 0
+	// Preserve the currently selected suggestion if it still matches.
+	var currentSuggestion []rune
+	if m.currentSuggestionIndex < len(m.matchedSuggestions) {
+		currentSuggestion = m.matchedSuggestions[m.currentSuggestionIndex]
 	}
 
 	m.matchedSuggestions = matches
+
+	// Find the previous selection in the new match list.
+	m.currentSuggestionIndex = 0
+	if currentSuggestion != nil {
+		for i, s := range matches {
+			if string(s) == string(currentSuggestion) {
+				m.currentSuggestionIndex = i
+				break
+			}
+		}
+	}
 }
 
 // nextSuggestion selects the next suggestion.
