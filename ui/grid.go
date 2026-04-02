@@ -64,8 +64,8 @@ func logColumns() []data.Column[logpkg.LogRecord] {
 	}
 }
 
-func newLogGrid(records []logpkg.LogRecord, width, height int) grid.Model[logpkg.LogRecord] {
-	return grid.New(
+func newLogGrid(records []logpkg.LogRecord, width, height int, extFilter func(logpkg.LogRecord) bool) grid.Model[logpkg.LogRecord] {
+	opts := []grid.Option[logpkg.LogRecord]{
 		grid.WithColumns(logColumns()),
 		grid.WithRows(records),
 		grid.WithRowID(func(r logpkg.LogRecord) string {
@@ -76,7 +76,11 @@ func newLogGrid(records []logpkg.LogRecord, width, height int) grid.Model[logpkg
 		grid.WithSelection[logpkg.LogRecord](selection.SelectSingle),
 		grid.WithQuickFilter[logpkg.LogRecord](true),
 		grid.WithFocused[logpkg.LogRecord](true),
-	)
+	}
+	if extFilter != nil {
+		opts = append(opts, grid.WithExternalFilter(extFilter))
+	}
+	return grid.New(opts...)
 }
 
 func formatAttrs(attrs map[string]any) string {
