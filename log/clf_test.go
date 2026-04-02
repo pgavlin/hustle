@@ -77,6 +77,42 @@ func TestCLF_ClientError(t *testing.T) {
 	}
 }
 
+func TestCLF_RequestLineParsed(t *testing.T) {
+	f := &CLFFormat{}
+	line := `10.0.0.1 - - [15/Jan/2024:10:30:00 +0000] "GET /api/v1/users HTTP/1.1" 200 512 "-" "curl/7.0"`
+	rec, err := f.ParseRecord(line)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec.Attrs["method"] != "GET" {
+		t.Errorf("method = %v, want GET", rec.Attrs["method"])
+	}
+	if rec.Attrs["path"] != "/api/v1/users" {
+		t.Errorf("path = %v, want /api/v1/users", rec.Attrs["path"])
+	}
+	if rec.Attrs["protocol"] != "HTTP/1.1" {
+		t.Errorf("protocol = %v, want HTTP/1.1", rec.Attrs["protocol"])
+	}
+}
+
+func TestCLF_QueryParams(t *testing.T) {
+	f := &CLFFormat{}
+	line := `10.0.0.1 - - [15/Jan/2024:10:30:00 +0000] "GET /search?q=hello&page=2 HTTP/1.1" 200 512 "-" "curl/7.0"`
+	rec, err := f.ParseRecord(line)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec.Attrs["path"] != "/search" {
+		t.Errorf("path = %v, want /search", rec.Attrs["path"])
+	}
+	if rec.Attrs["query.q"] != "hello" {
+		t.Errorf("query.q = %v, want hello", rec.Attrs["query.q"])
+	}
+	if rec.Attrs["query.page"] != "2" {
+		t.Errorf("query.page = %v, want 2", rec.Attrs["query.page"])
+	}
+}
+
 func TestCLF_Invalid(t *testing.T) {
 	f := &CLFFormat{}
 	_, err := f.ParseRecord("not a log line")

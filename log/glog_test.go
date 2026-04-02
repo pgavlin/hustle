@@ -75,6 +75,52 @@ func TestGlog_FullYear(t *testing.T) {
 	}
 }
 
+func TestGlog_KlogStructured(t *testing.T) {
+	f := &GlogFormat{}
+	rec, err := f.ParseRecord(`I0115 10:30:00.123456 12345 controller.go:116] "Pod status updated" pod="kube-system/kubedns" status="ready"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec.Msg != "Pod status updated" {
+		t.Errorf("msg = %q, want 'Pod status updated'", rec.Msg)
+	}
+	if rec.Attrs["pod"] != "kube-system/kubedns" {
+		t.Errorf("pod = %v", rec.Attrs["pod"])
+	}
+	if rec.Attrs["status"] != "ready" {
+		t.Errorf("status = %v", rec.Attrs["status"])
+	}
+}
+
+func TestGlog_KlogStructuredNumericValue(t *testing.T) {
+	f := &GlogFormat{}
+	rec, err := f.ParseRecord(`E0115 10:30:00.123456 12345 sync.go:42] "Sync failed" retries=3 duration=1.5`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec.Msg != "Sync failed" {
+		t.Errorf("msg = %q, want 'Sync failed'", rec.Msg)
+	}
+	if rec.Attrs["retries"] != float64(3) {
+		t.Errorf("retries = %v, want 3", rec.Attrs["retries"])
+	}
+	if rec.Attrs["duration"] != 1.5 {
+		t.Errorf("duration = %v, want 1.5", rec.Attrs["duration"])
+	}
+}
+
+func TestGlog_NonStructuredMessageUnchanged(t *testing.T) {
+	f := &GlogFormat{}
+	rec, err := f.ParseRecord(`I0115 10:30:00.123456 12345 server.go:42] Server started on port 8080`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Non-quoted message should be unchanged
+	if rec.Msg != "Server started on port 8080" {
+		t.Errorf("msg = %q", rec.Msg)
+	}
+}
+
 func TestGlog_Invalid(t *testing.T) {
 	f := &GlogFormat{}
 	_, err := f.ParseRecord("not a glog line")

@@ -2,8 +2,10 @@ package log
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -50,6 +52,9 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 		rec.Level = "INFO"
 	}
 
+	// Parse request line into method, path, protocol
+	parseRequestLine(m[5], rec.Attrs)
+
 	// Attrs
 	rec.Attrs["remote_addr"] = m[1]
 	if m[3] != "-" {
@@ -67,4 +72,41 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 	}
 
 	return rec, nil
+}
+
+// parseRequestLine extracts method, path, protocol, and query parameters
+// from an HTTP request line like "GET /api/v1/users?id=123 HTTP/1.1".
+func parseRequestLine(reqLine string, attrs map[string]any) {
+	parts := strings.SplitN(reqLine, " ", 3)
+	if len(parts) < 2 {
+		return
+	}
+
+	attrs["method"] = parts[0]
+
+	rawPath := parts[1]
+	if len(parts) >= 3 {
+		attrs["protocol"] = parts[2]
+	}
+
+	// Parse path and query string
+	u, err := url.ParseRequestURI(rawPath)
+	if err != nil {
+		attrs["path"] = rawPath
+		return
+	}
+
+	attrs["path"] = u.Path
+
+	// Extract query parameters as individual attributes
+	if u.RawQuery != "" {
+		params := u.Query()
+		for k, v := range params {
+			if len(v) == 1 {
+				attrs["query."+k] = v[0]
+			} else {
+				attrs["query."+k] = strings.Join(v, ",")
+			}
+		}
+	}
 }
