@@ -82,7 +82,7 @@ func DefaultKeyMap() KeyMap {
 		Paste:                   key.NewBinding(key.WithKeys("ctrl+v")),
 		AcceptSuggestion:        key.NewBinding(key.WithKeys("tab")),
 		NextSuggestion:          key.NewBinding(key.WithKeys("down", "ctrl+n")),
-		PrevSuggestion:          key.NewBinding(key.WithKeys("up", "ctrl+p")),
+		PrevSuggestion:          key.NewBinding(key.WithKeys("shift+tab", "up", "ctrl+p")),
 	}
 }
 
