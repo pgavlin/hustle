@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pgavlin/tea-grid/grid"
 
+	filterpkg "github.com/pgavlin/hustle/filter"
 	logpkg "github.com/pgavlin/hustle/log"
 )
 
@@ -16,6 +17,7 @@ type appView int
 const (
 	viewGrid appView = iota
 	viewDetail
+	viewJQInput
 )
 
 var statusBarStyle = lipgloss.NewStyle().
@@ -25,13 +27,16 @@ var statusBarStyle = lipgloss.NewStyle().
 
 // Model is the top-level bubbletea model for hustle.
 type Model struct {
-	records []logpkg.LogRecord
-	skipped int
-	grid    grid.Model[logpkg.LogRecord]
-	detail  DetailModel
-	view    appView
-	width   int
-	height  int
+	records  []logpkg.LogRecord
+	skipped  int
+	grid     grid.Model[logpkg.LogRecord]
+	detail   DetailModel
+	jqInput  JQInputModel
+	jqFilter *filterpkg.JQFilter
+	jqExpr   string
+	view     appView
+	width    int
+	height   int
 }
 
 // New creates the top-level model with loaded records.
@@ -48,19 +53,50 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+func (m *Model) rebuildGrid() {
+	gridHeight := m.height - 1
+	var extFilter func(logpkg.LogRecord) bool
+	if m.jqFilter != nil {
+		extFilter = m.jqFilter.Match
+	}
+	m.grid = newLogGrid(m.records, m.width, gridHeight, extFilter)
+}
+
 // Update implements tea.Model.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		gridHeight := m.height - 1 // reserve 1 line for status bar
-		m.grid = newLogGrid(m.records, m.width, gridHeight)
+		m.rebuildGrid()
 		m.detail.SetSize(m.width, m.height)
 		return m, nil
 
+	case jqResult:
+		if msg.cancelled {
+			m.view = viewGrid
+			return m, nil
+		}
+		expr := msg.expr
+		if expr == "" {
+			m.jqFilter = nil
+			m.jqExpr = ""
+			m.view = viewGrid
+			m.rebuildGrid()
+			return m, nil
+		}
+		f, err := filterpkg.Compile(expr)
+		if err != nil {
+			m.jqInput.SetError(err.Error())
+			return m, nil
+		}
+		m.jqFilter = f
+		m.jqExpr = expr
+		m.view = viewGrid
+		m.rebuildGrid()
+		return m, nil
+
 	case tea.KeyPressMsg:
-		// Let the grid handle keys when it's in a filter editing mode.
 		if m.view == viewGrid && m.grid.Filtering() {
 			break
 		}
@@ -82,6 +118,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.view = viewGrid
 				return m, nil
 			}
+		case "j":
+			if m.view == viewGrid {
+				m.jqInput = NewJQInputModel(m.jqExpr, m.width)
+				m.view = viewJQInput
+				return m, nil
+			}
 		}
 	}
 
@@ -94,6 +136,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.detail, cmd = m.detail.Update(msg)
 		return m, cmd
+	case viewJQInput:
+		var cmd tea.Cmd
+		m.jqInput, cmd = m.jqInput.Update(msg)
+		return m, cmd
 	}
 
 	return m, nil
@@ -105,6 +151,8 @@ func (m Model) View() tea.View {
 	switch m.view {
 	case viewDetail:
 		v = m.detail.View()
+	case viewJQInput:
+		v = tea.NewView(m.grid.View() + "\n" + m.jqInput.View())
 	default:
 		v = tea.NewView(m.grid.View() + "\n" + m.statusBar())
 	}
@@ -116,6 +164,9 @@ func (m Model) statusBar() string {
 	text := fmt.Sprintf(" %d records", len(m.records))
 	if m.skipped > 0 {
 		text += fmt.Sprintf(", %d skipped", m.skipped)
+	}
+	if m.jqExpr != "" {
+		text += fmt.Sprintf(" | jq: %s", m.jqExpr)
 	}
 	return statusBarStyle.Width(m.width).Render(text)
 }
