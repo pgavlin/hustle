@@ -22,6 +22,12 @@ func Load(path string, format Format) ([]LogRecord, int, Format, error) {
 // using the given one. Returns the records, skip count, detected format,
 // and any error.
 func LoadReader(r io.Reader, format Format) ([]LogRecord, int, Format, error) {
+	// CloudWatch needs document-level parsing, not line-by-line
+	if cw, ok := format.(*CloudWatchFormat); ok {
+		_ = cw
+		return LoadCloudWatchJSON(r)
+	}
+
 	var prefixLines []string
 
 	if format == nil {

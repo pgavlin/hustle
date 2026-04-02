@@ -11,11 +11,14 @@ import (
 // Formats is the registry of known formats, in auto-detection priority order.
 // More specific formats (JSON, glog, CLF) are tried before the permissive
 // logfmt parser, which accepts almost anything with key=value pairs.
+// CloudWatch is listed for --format lookup but not in line-by-line detection
+// (it needs special document-level handling).
 var Formats = []Format{
 	&JSONFormat{},
 	&GlogFormat{},
 	&CLFFormat{},
 	&LogfmtFormat{},
+	&CloudWatchFormat{},
 }
 
 // FormatByName returns the format with the given name, or nil.
