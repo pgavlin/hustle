@@ -128,6 +128,6 @@ func parseInnerMessage(message string) (LogRecord, string) {
 	// No format matched — treat the whole message as plain text
 	return LogRecord{
 		Msg:   message,
-		Attrs: make(map[string]any),
+		Attrs: make(map[string]any, 4),
 	}, ""
 }

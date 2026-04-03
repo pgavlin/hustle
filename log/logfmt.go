@@ -22,7 +22,7 @@ func (f *LogfmtFormat) ParseRecord(line string) (LogRecord, error) {
 
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any),
+		Attrs:   make(map[string]any, len(pairs)),
 	}
 
 	for _, p := range pairs {

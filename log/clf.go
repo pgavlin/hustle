@@ -38,7 +38,7 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any),
+		Attrs:   make(map[string]any, 8),
 	}
 
 	// Parse time
