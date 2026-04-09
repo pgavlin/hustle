@@ -20,21 +20,22 @@ func TestLoad_ValidFile(t *testing.T) {
 	path := writeTempFile(t, `{"time":"2024-01-15T10:30:00Z","level":"INFO","msg":"hello"}
 {"time":"2024-01-15T10:31:00Z","level":"ERROR","msg":"oops","code":500}
 `)
-	records, skipped, _, err := Load(path, nil)
+	lf, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(records) != 2 {
-		t.Fatalf("got %d records, want 2", len(records))
+	defer lf.Close()
+	if len(lf.Records) != 2 {
+		t.Fatalf("got %d records, want 2", len(lf.Records))
 	}
-	if skipped != 0 {
-		t.Errorf("skipped = %d, want 0", skipped)
+	if lf.Skipped != 0 {
+		t.Errorf("skipped = %d, want 0", lf.Skipped)
 	}
-	if records[0].Msg != "hello" {
-		t.Errorf("records[0].Msg = %q, want %q", records[0].Msg, "hello")
+	if lf.Records[0].Msg != "hello" {
+		t.Errorf("Records[0].Msg = %q, want %q", lf.Records[0].Msg, "hello")
 	}
-	if records[1].Attrs["code"] != float64(500) {
-		t.Errorf("records[1].Attrs[code] = %v, want 500", records[1].Attrs["code"])
+	if lf.Records[1].Attrs["code"] != float64(500) {
+		t.Errorf("Records[1].Attrs[code] = %v, want 500", lf.Records[1].Attrs["code"])
 	}
 }
 
@@ -43,29 +44,31 @@ func TestLoad_SkipsMalformedLines(t *testing.T) {
 not json
 {"level":"WARN","msg":"also good"}
 `)
-	records, skipped, _, err := Load(path, nil)
+	lf, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(records) != 2 {
-		t.Fatalf("got %d records, want 2", len(records))
+	defer lf.Close()
+	if len(lf.Records) != 2 {
+		t.Fatalf("got %d records, want 2", len(lf.Records))
 	}
-	if skipped != 1 {
-		t.Errorf("skipped = %d, want 1", skipped)
+	if lf.Skipped != 1 {
+		t.Errorf("skipped = %d, want 1", lf.Skipped)
 	}
 }
 
 func TestLoad_EmptyFile(t *testing.T) {
 	path := writeTempFile(t, "")
-	records, skipped, _, err := Load(path, nil)
+	lf, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(records) != 0 {
-		t.Fatalf("got %d records, want 0", len(records))
+	defer lf.Close()
+	if len(lf.Records) != 0 {
+		t.Fatalf("got %d records, want 0", len(lf.Records))
 	}
-	if skipped != 0 {
-		t.Errorf("skipped = %d, want 0", skipped)
+	if lf.Skipped != 0 {
+		t.Errorf("skipped = %d, want 0", lf.Skipped)
 	}
 }
 
@@ -74,20 +77,21 @@ func TestLoad_SkipsBlankLines(t *testing.T) {
 
 {"level":"INFO","msg":"two"}
 `)
-	records, skipped, _, err := Load(path, nil)
+	lf, err := Load(path, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(records) != 2 {
-		t.Fatalf("got %d records, want 2", len(records))
+	defer lf.Close()
+	if len(lf.Records) != 2 {
+		t.Fatalf("got %d records, want 2", len(lf.Records))
 	}
-	if skipped != 0 {
-		t.Errorf("skipped = %d, want 0", skipped)
+	if lf.Skipped != 0 {
+		t.Errorf("skipped = %d, want 0", lf.Skipped)
 	}
 }
 
 func TestLoad_FileNotFound(t *testing.T) {
-	_, _, _, err := Load("/nonexistent/path/to/file.log", nil)
+	_, err := Load("/nonexistent/path/to/file.log", nil)
 	if err == nil {
 		t.Error("expected error for missing file")
 	}

@@ -94,15 +94,37 @@ func isUpperASCII(s string) bool {
 	return true
 }
 
+// commonLevels maps lowercase (and mixed-case) level strings to their canonical
+// uppercase forms. Avoids strings.ToUpper allocations for the common case.
+var commonLevels = map[string]string{
+	"trace":   "TRACE",
+	"debug":   "DEBUG",
+	"info":    "INFO",
+	"warn":    "WARN",
+	"warning": "WARNING",
+	"error":   "ERROR",
+	"fatal":   "FATAL",
+	"panic":   "PANIC",
+}
+
+// normalizeLevel returns the canonical uppercase form of a level string,
+// avoiding an allocation for the common case.
+func normalizeLevel(s string) string {
+	if isUpperASCII(s) {
+		return s
+	}
+	if l, ok := commonLevels[s]; ok {
+		return l
+	}
+	return strings.ToUpper(s)
+}
+
 // parseLevel normalizes level values to uppercase strings.
 // Handles string levels and bunyan numeric levels.
 func parseLevel(v any) string {
 	switch v := v.(type) {
 	case string:
-		if isUpperASCII(v) {
-			return v
-		}
-		return strings.ToUpper(v)
+		return normalizeLevel(v)
 	case float64:
 		// Bunyan numeric levels
 		switch {

@@ -34,7 +34,7 @@ func (f *LogfmtFormat) ParseRecord(line string) (LogRecord, error) {
 				rec.Time = t
 			}
 		case "level", "lvl", "severity":
-			rec.Level = strings.ToUpper(p.value)
+			rec.Level = normalizeLevel(p.value)
 		case "msg", "message":
 			rec.Msg = p.value
 		default:

@@ -14,16 +14,38 @@ import (
 	logpkg "github.com/pgavlin/hustle/log"
 )
 
+// containsFold reports whether s contains substr under Unicode case-folding.
+func containsFold(s, substr string) bool {
+	if len(substr) == 0 {
+		return true
+	}
+	if len(substr) > len(s) {
+		return false
+	}
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if strings.EqualFold(s[i:i+len(substr)], substr) {
+			return true
+		}
+	}
+	return false
+}
+
 func logColumns() []data.Column[logpkg.LogRecord] {
 	return []data.Column[logpkg.LogRecord]{
 		{
 			ColumnID:   "time",
 			HeaderName: "Time",
-			ValueGetter: func(r logpkg.LogRecord) any {
+			Value: func(r logpkg.LogRecord) any {
 				return r.Time
 			},
-			ValueFormatter: func(v any, r logpkg.LogRecord) string {
+			Text: func(r *logpkg.LogRecord) string {
 				return r.Time.Format("15:04:05.000")
+			},
+			Compare: func(a, b *logpkg.LogRecord) int {
+				return a.Time.Compare(b.Time)
+			},
+			QuickFilterMatch: func(r *logpkg.LogRecord, word string) bool {
+				return containsFold(r.Time.Format("15:04:05.000"), word)
 			},
 			Width:      14,
 			Filterable: true,
@@ -33,8 +55,17 @@ func logColumns() []data.Column[logpkg.LogRecord] {
 		{
 			ColumnID:   "level",
 			HeaderName: "Level",
-			ValueGetter: func(r logpkg.LogRecord) any {
+			Value: func(r logpkg.LogRecord) any {
 				return r.Level
+			},
+			Text: func(r *logpkg.LogRecord) string {
+				return r.Level
+			},
+			Compare: func(a, b *logpkg.LogRecord) int {
+				return strings.Compare(a.Level, b.Level)
+			},
+			QuickFilterMatch: func(r *logpkg.LogRecord, word string) bool {
+				return containsFold(r.Level, word)
 			},
 			Width:      7,
 			Filterable: true,
@@ -44,8 +75,17 @@ func logColumns() []data.Column[logpkg.LogRecord] {
 		{
 			ColumnID:   "msg",
 			HeaderName: "Message",
-			ValueGetter: func(r logpkg.LogRecord) any {
+			Value: func(r logpkg.LogRecord) any {
 				return r.Msg
+			},
+			Text: func(r *logpkg.LogRecord) string {
+				return r.Msg
+			},
+			Compare: func(a, b *logpkg.LogRecord) int {
+				return strings.Compare(a.Msg, b.Msg)
+			},
+			QuickFilterMatch: func(r *logpkg.LogRecord, word string) bool {
+				return containsFold(r.Msg, word)
 			},
 			Flex:       2,
 			Filterable: true,
@@ -55,8 +95,29 @@ func logColumns() []data.Column[logpkg.LogRecord] {
 		{
 			ColumnID:   "attrs",
 			HeaderName: "Attributes",
-			ValueGetter: func(r logpkg.LogRecord) any {
+			Value: func(r logpkg.LogRecord) any {
 				return formatAttrs(r.Attrs)
+			},
+			Text: func(r *logpkg.LogRecord) string {
+				return formatAttrs(r.Attrs)
+			},
+			QuickFilterMatch: func(r *logpkg.LogRecord, word string) bool {
+				// Search keys and values directly without sorting or formatting
+				for k, v := range r.Attrs {
+					if containsFold(k, word) {
+						return true
+					}
+					if s, ok := v.(string); ok {
+						if containsFold(s, word) {
+							return true
+						}
+					} else {
+						if containsFold(fmt.Sprint(v), word) {
+							return true
+						}
+					}
+				}
+				return false
 			},
 			Flex:       1,
 			Filterable: true,

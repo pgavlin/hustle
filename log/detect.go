@@ -1,13 +1,11 @@
 package log
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"strings"
 )
 
-// Formats is the registry of known formats, in auto-detection priority order.
 // Formats is the registry of known formats, in auto-detection priority order.
 // More specific formats (JSON, glog, CLF) are tried before the permissive
 // logfmt parser, which accepts almost anything with key=value pairs.
@@ -46,35 +44,41 @@ const detectSampleSize = 10
 // and tries each format. Returns the first format that parses >50% of the
 // sample lines, along with the sampled lines (so the caller doesn't lose them).
 func DetectFormat(r io.Reader) (Format, []string, error) {
-	scanner := bufio.NewScanner(r)
-	var lines []string
-	for scanner.Scan() && len(lines) < detectSampleSize {
-		line := scanner.Text()
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	if err := scanner.Err(); err != nil {
+	data, err := io.ReadAll(r)
+	if err != nil {
 		return nil, nil, fmt.Errorf("reading sample: %w", err)
 	}
-	if len(lines) == 0 {
+	lines := splitLines(data)
+	format, err := detectFormatFromLines(lines)
+	return format, lines, err
+}
+
+// detectFormatFromLines detects the format from a set of pre-split lines.
+func detectFormatFromLines(lines []string) (Format, error) {
+	sample := lines
+	if len(sample) > detectSampleSize {
+		sample = sample[:detectSampleSize]
+	}
+	if len(sample) == 0 {
 		// Empty input — default to JSON
-		return &JSONFormat{}, nil, nil
+		return &JSONFormat{}, nil
 	}
 
-	for _, f := range Formats {
+	// Exclude CloudWatch from line-by-line detection (needs document-level handling)
+	lineFormats := Formats[:len(Formats)-1]
+	for _, f := range lineFormats {
 		parsed := 0
-		for _, line := range lines {
+		for _, line := range sample {
 			if _, err := f.ParseRecord(line); err == nil {
 				parsed++
 			}
 		}
-		if parsed > len(lines)/2 {
-			return f, lines, nil
+		if parsed > len(sample)/2 {
+			return f, nil
 		}
 	}
 
-	return nil, lines, fmt.Errorf(
+	return nil, fmt.Errorf(
 		"could not detect log format from sample; try --format (%s)",
 		strings.Join(FormatNames(), ", "),
 	)
