@@ -3,6 +3,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
@@ -38,6 +39,7 @@ type Model struct {
 	jqFilter   *filterpkg.JQFilter
 	jqExpr     string
 	view       appView
+	showHelp   bool
 	gridReady  bool
 	width      int
 	height     int
@@ -121,6 +123,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyPressMsg:
+		// Help overlay consumes all keys except dismiss keys.
+		if m.showHelp {
+			switch msg.String() {
+			case "esc", "?", "q":
+				m.showHelp = false
+			}
+			return m, nil
+		}
+
 		if m.view == viewGrid && m.grid.Filtering() {
 			break
 		}
@@ -128,6 +139,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			if m.view == viewGrid {
 				return m, tea.Quit
+			}
+		case "?":
+			if m.view == viewGrid {
+				m.showHelp = true
+				return m, nil
 			}
 		case "enter":
 			if m.view == viewGrid {
@@ -179,7 +195,11 @@ func (m Model) View() tea.View {
 	case viewJQInput:
 		v = tea.NewView(m.grid.View() + "\n" + m.jqInput.View())
 	default:
-		v = tea.NewView(m.grid.View() + "\n" + m.statusBar())
+		base := m.grid.View() + "\n" + m.statusBar()
+		if m.showHelp {
+			base = placeOverlay(m.width, m.height, renderHelpOverlay(), base)
+		}
+		v = tea.NewView(base)
 	}
 	v.AltScreen = true
 	return v
@@ -193,5 +213,12 @@ func (m Model) statusBar() string {
 	if m.jqExpr != "" {
 		text += fmt.Sprintf(" | jq: %s", m.jqExpr)
 	}
+
+	hint := "? help"
+	padding := m.width - len(text) - len(hint) - 2
+	if padding > 0 {
+		text += strings.Repeat(" ", padding) + hint
+	}
+
 	return statusBarStyle.Width(m.width).Render(text)
 }

@@ -25,6 +25,12 @@ Sleep 1.5s
 Up 15
 Sleep 1s
 
+# Show help overlay
+Type "?"
+Sleep 3s
+Escape
+Sleep 1s
+
 # Quick filter: search for timeout
 Type "/"
 Sleep 400ms
