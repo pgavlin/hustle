@@ -2,50 +2,45 @@ goos: darwin
 goarch: arm64
 pkg: github.com/pgavlin/hustle/log
 cpu: Apple M4 Max
-BenchmarkParseRecord/glog-16         	    4137	    257939 ns/op	  368004 B/op	    5000 allocs/op
-BenchmarkParseRecord/glog-16         	    4424	    264509 ns/op	  368003 B/op	    5000 allocs/op
-BenchmarkParseRecord/glog-16         	    4717	    267154 ns/op	  368002 B/op	    5000 allocs/op
-BenchmarkParseRecord/glog-16         	    4572	    272505 ns/op	  368003 B/op	    5000 allocs/op
-BenchmarkParseRecord/glog-16         	    4396	    269731 ns/op	  368003 B/op	    5000 allocs/op
-BenchmarkParseRecord/json-16         	    3339	    366279 ns/op	  407957 B/op	    6176 allocs/op
-BenchmarkParseRecord/json-16         	    3320	    360591 ns/op	  407957 B/op	    6176 allocs/op
-BenchmarkParseRecord/json-16         	    3418	    360173 ns/op	  407958 B/op	    6176 allocs/op
-BenchmarkParseRecord/json-16         	    3319	    363223 ns/op	  407958 B/op	    6176 allocs/op
-BenchmarkParseRecord/json-16         	    3321	    362806 ns/op	  407957 B/op	    6176 allocs/op
-BenchmarkParseRecord/logfmt-16       	    2730	    431290 ns/op	  864536 B/op	   14067 allocs/op
-BenchmarkParseRecord/logfmt-16       	    2823	    421708 ns/op	  864535 B/op	   14067 allocs/op
-BenchmarkParseRecord/logfmt-16       	    2815	    422198 ns/op	  864534 B/op	   14067 allocs/op
-BenchmarkParseRecord/logfmt-16       	    2816	    422591 ns/op	  864534 B/op	   14067 allocs/op
-BenchmarkParseRecord/logfmt-16       	    2830	    428015 ns/op	  864534 B/op	   14067 allocs/op
-BenchmarkLoad/glog-16                	      39	  30715704 ns/op	 370.90 MB/s	50120646 B/op	  500005 allocs/op
-BenchmarkLoad/glog-16                	      37	  30322998 ns/op	 375.70 MB/s	50120236 B/op	  500005 allocs/op
-BenchmarkLoad/glog-16                	      38	  31522066 ns/op	 361.41 MB/s	50120240 B/op	  500005 allocs/op
-BenchmarkLoad/glog-16                	      36	  30785402 ns/op	 370.06 MB/s	50120243 B/op	  500005 allocs/op
-BenchmarkLoad/glog-16                	      37	  30718505 ns/op	 370.86 MB/s	50120231 B/op	  500005 allocs/op
-BenchmarkLoad/json-16                	      27	  41454519 ns/op	 338.13 MB/s	53888344 B/op	  632718 allocs/op
-BenchmarkLoad/json-16                	      27	  41523255 ns/op	 337.57 MB/s	53888173 B/op	  632718 allocs/op
-BenchmarkLoad/json-16                	      28	  41363772 ns/op	 338.88 MB/s	53888228 B/op	  632718 allocs/op
-BenchmarkLoad/json-16                	      27	  41009409 ns/op	 341.80 MB/s	53888440 B/op	  632718 allocs/op
-BenchmarkLoad/json-16                	      27	  41871531 ns/op	 334.77 MB/s	53888273 B/op	  632718 allocs/op
-BenchmarkLoad/logfmt-16              	      22	  51400419 ns/op	 229.95 MB/s	102099283 B/op	 1446771 allocs/op
-BenchmarkLoad/logfmt-16              	      22	  51176553 ns/op	 230.96 MB/s	102099254 B/op	 1446771 allocs/op
-BenchmarkLoad/logfmt-16              	      24	  52523036 ns/op	 225.03 MB/s	102099294 B/op	 1446771 allocs/op
-BenchmarkLoad/logfmt-16              	      20	  51952190 ns/op	 227.51 MB/s	102099272 B/op	 1446771 allocs/op
-BenchmarkLoad/logfmt-16              	      22	  51945856 ns/op	 227.54 MB/s	102099273 B/op	 1446771 allocs/op
-BenchmarkDetect/glog-16              	  267470	      4479 ns/op	    6404 B/op	     120 allocs/op
-BenchmarkDetect/glog-16              	  265344	      4461 ns/op	    6404 B/op	     120 allocs/op
-BenchmarkDetect/glog-16              	  270860	      4419 ns/op	    6404 B/op	     120 allocs/op
-BenchmarkDetect/glog-16              	  274186	      4452 ns/op	    6404 B/op	     120 allocs/op
-BenchmarkDetect/glog-16              	  281403	      4426 ns/op	    6404 B/op	     120 allocs/op
-BenchmarkDetect/json-16              	  377385	      3169 ns/op	    3714 B/op	      58 allocs/op
-BenchmarkDetect/json-16              	  376518	      3198 ns/op	    3714 B/op	      58 allocs/op
-BenchmarkDetect/json-16              	  374788	      3185 ns/op	    3714 B/op	      58 allocs/op
-BenchmarkDetect/json-16              	  372747	      3169 ns/op	    3714 B/op	      58 allocs/op
-BenchmarkDetect/json-16              	  380775	      3226 ns/op	    3714 B/op	      58 allocs/op
-BenchmarkSplitLines-16               	     633	   1909858 ns/op	5965.04 MB/s	 5316611 B/op	       4 allocs/op
-BenchmarkSplitLines-16               	     646	   1879551 ns/op	6061.22 MB/s	 5316612 B/op	       4 allocs/op
-BenchmarkSplitLines-16               	     651	   1864036 ns/op	6111.67 MB/s	 5316612 B/op	       4 allocs/op
-BenchmarkSplitLines-16               	     649	   1873765 ns/op	6079.94 MB/s	 5316612 B/op	       4 allocs/op
-BenchmarkSplitLines-16               	     651	   1870658 ns/op	6090.03 MB/s	 5316611 B/op	       4 allocs/op
+BenchmarkParseRecord/glog-16         	    1194	    994384 ns/op	  160000 B/op	    4000 allocs/op
+BenchmarkParseRecord/glog-16         	    1212	    953527 ns/op	  160004 B/op	    4000 allocs/op
+BenchmarkParseRecord/glog-16         	    1252	    974763 ns/op	  160000 B/op	    4000 allocs/op
+BenchmarkParseRecord/glog-16         	    1122	   1045174 ns/op	  160000 B/op	    4000 allocs/op
+BenchmarkParseRecord/glog-16         	    1078	   1083772 ns/op	  160000 B/op	    4000 allocs/op
+BenchmarkParseRecord/json-16         	     848	   1317521 ns/op	  183742 B/op	    3433 allocs/op
+BenchmarkParseRecord/json-16         	     997	   1327080 ns/op	  183743 B/op	    3433 allocs/op
+BenchmarkParseRecord/json-16         	     812	   1385915 ns/op	  183743 B/op	    3433 allocs/op
+BenchmarkParseRecord/json-16         	     888	   1385572 ns/op	  183745 B/op	    3433 allocs/op
+BenchmarkParseRecord/json-16         	     956	   1271214 ns/op	  183742 B/op	    3433 allocs/op
+BenchmarkParseRecord/logfmt-16       	    2487	    789491 ns/op	  186064 B/op	    3599 allocs/op
+BenchmarkParseRecord/logfmt-16       	    1422	    811983 ns/op	  186064 B/op	    3599 allocs/op
+BenchmarkParseRecord/logfmt-16       	    1350	    814252 ns/op	  186065 B/op	    3599 allocs/op
+BenchmarkParseRecord/logfmt-16       	    6560	    176028 ns/op	  186065 B/op	    3599 allocs/op
+BenchmarkParseRecord/logfmt-16       	    6826	    181058 ns/op	  186065 B/op	    3599 allocs/op
+BenchmarkLoad/glog-16                	      49	  22685753 ns/op	 502.18 MB/s	25601040 B/op	  400001 allocs/op
+BenchmarkLoad/glog-16                	      52	  22768581 ns/op	 500.35 MB/s	25601043 B/op	  400001 allocs/op
+BenchmarkLoad/glog-16                	      51	  23037725 ns/op	 494.51 MB/s	25601247 B/op	  400001 allocs/op
+BenchmarkLoad/glog-16                	      50	  23128411 ns/op	 492.57 MB/s	25601041 B/op	  400001 allocs/op
+BenchmarkLoad/glog-16                	      51	  22892875 ns/op	 497.64 MB/s	25601046 B/op	  400001 allocs/op
+BenchmarkLoad/json-16                	      36	  32153162 ns/op	 435.95 MB/s	28384690 B/op	  357187 allocs/op
+BenchmarkLoad/json-16                	      32	  39664794 ns/op	 353.39 MB/s	28384691 B/op	  357186 allocs/op
+BenchmarkLoad/json-16                	      21	  65297218 ns/op	 214.67 MB/s	28384788 B/op	  357187 allocs/op
+BenchmarkLoad/json-16                	      33	  33949270 ns/op	 412.89 MB/s	28384596 B/op	  357187 allocs/op
+BenchmarkLoad/json-16                	      31	  36820384 ns/op	 380.69 MB/s	28384596 B/op	  357187 allocs/op
+BenchmarkLoad/logfmt-16              	      43	  30613772 ns/op	 386.09 MB/s	28705868 B/op	  375961 allocs/op
+BenchmarkLoad/logfmt-16              	      32	  33109809 ns/op	 356.98 MB/s	28705883 B/op	  375961 allocs/op
+BenchmarkLoad/logfmt-16              	      37	  27664520 ns/op	 427.24 MB/s	28705878 B/op	  375961 allocs/op
+BenchmarkLoad/logfmt-16              	      45	  24079857 ns/op	 490.85 MB/s	28705880 B/op	  375961 allocs/op
+BenchmarkLoad/logfmt-16              	      48	  22660316 ns/op	 521.60 MB/s	28705874 B/op	  375961 allocs/op
+BenchmarkDetect/glog-16              	  282481	      4381 ns/op	    5127 B/op	     110 allocs/op
+BenchmarkDetect/glog-16              	  264447	      4968 ns/op	    5127 B/op	     110 allocs/op
+BenchmarkDetect/glog-16              	  214424	      6366 ns/op	    5127 B/op	     110 allocs/op
+BenchmarkDetect/glog-16              	  175705	      6617 ns/op	    5127 B/op	     110 allocs/op
+BenchmarkDetect/glog-16              	  195292	      5400 ns/op	    5127 B/op	     110 allocs/op
+BenchmarkDetect/json-16              	  381453	      2960 ns/op	    1618 B/op	      31 allocs/op
+BenchmarkDetect/json-16              	  411883	      2906 ns/op	    1618 B/op	      31 allocs/op
+BenchmarkDetect/json-16              	  419629	      2947 ns/op	    1618 B/op	      31 allocs/op
+BenchmarkDetect/json-16              	  391490	      3229 ns/op	    1618 B/op	      31 allocs/op
+BenchmarkDetect/json-16              	  341796	      3514 ns/op	    1618 B/op	      31 allocs/op
 PASS
-ok  	github.com/pgavlin/hustle/log	58.738s
+ok  	github.com/pgavlin/hustle/log	57.437s
