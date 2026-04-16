@@ -1,3 +1,7 @@
 hustle
+hustle-baseline
 cpu.prof
+cpu-baseline.prof
 mem.prof
+mem-baseline.prof
+examples/wasm-plugin-rust/target/
