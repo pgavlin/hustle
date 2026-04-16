@@ -1,0 +1,51 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/pgavlin/hustle/log
+cpu: Apple M4 Max
+BenchmarkParseRecord/glog-16         	    4282	    254806 ns/op	  368004 B/op	    5000 allocs/op
+BenchmarkParseRecord/glog-16         	    4965	    255063 ns/op	  368003 B/op	    5000 allocs/op
+BenchmarkParseRecord/glog-16         	    4722	    264417 ns/op	  368002 B/op	    5000 allocs/op
+BenchmarkParseRecord/glog-16         	    4662	    263533 ns/op	  368002 B/op	    5000 allocs/op
+BenchmarkParseRecord/glog-16         	    4615	    267882 ns/op	  368003 B/op	    5000 allocs/op
+BenchmarkParseRecord/json-16         	    1197	    975347 ns/op	 5327709 B/op	   12176 allocs/op
+BenchmarkParseRecord/json-16         	    1294	   1016627 ns/op	 5327712 B/op	   12176 allocs/op
+BenchmarkParseRecord/json-16         	    1203	    970236 ns/op	 5327708 B/op	   12176 allocs/op
+BenchmarkParseRecord/json-16         	    1243	    973880 ns/op	 5327709 B/op	   12176 allocs/op
+BenchmarkParseRecord/json-16         	    1244	    968608 ns/op	 5327709 B/op	   12176 allocs/op
+BenchmarkParseRecord/logfmt-16       	    2847	    435129 ns/op	  864534 B/op	   14067 allocs/op
+BenchmarkParseRecord/logfmt-16       	    2695	    425563 ns/op	  864534 B/op	   14067 allocs/op
+BenchmarkParseRecord/logfmt-16       	    2626	    437146 ns/op	  864535 B/op	   14067 allocs/op
+BenchmarkParseRecord/logfmt-16       	    2785	    431687 ns/op	  864534 B/op	   14067 allocs/op
+BenchmarkParseRecord/logfmt-16       	    2667	    439873 ns/op	  864535 B/op	   14067 allocs/op
+BenchmarkLoad/glog-16                	      38	  30638212 ns/op	 371.84 MB/s	50120514 B/op	  500005 allocs/op
+BenchmarkLoad/glog-16                	      38	  30426296 ns/op	 374.43 MB/s	50120255 B/op	  500005 allocs/op
+BenchmarkLoad/glog-16                	      37	  30549376 ns/op	 372.92 MB/s	50120230 B/op	  500005 allocs/op
+BenchmarkLoad/glog-16                	      39	  30457475 ns/op	 374.04 MB/s	50120244 B/op	  500005 allocs/op
+BenchmarkLoad/glog-16                	      37	  30466234 ns/op	 373.93 MB/s	50120243 B/op	  500005 allocs/op
+BenchmarkLoad/json-16                	       9	 111901204 ns/op	 125.26 MB/s	545885825 B/op	 1232720 allocs/op
+BenchmarkLoad/json-16                	      10	 110314988 ns/op	 127.06 MB/s	545885209 B/op	 1232719 allocs/op
+BenchmarkLoad/json-16                	      10	 110916933 ns/op	 126.38 MB/s	545885228 B/op	 1232719 allocs/op
+BenchmarkLoad/json-16                	      10	 109019892 ns/op	 128.57 MB/s	545885161 B/op	 1232718 allocs/op
+BenchmarkLoad/json-16                	      10	 111117700 ns/op	 126.15 MB/s	545885249 B/op	 1232719 allocs/op
+BenchmarkLoad/logfmt-16              	      24	  50632573 ns/op	 233.44 MB/s	102099253 B/op	 1446771 allocs/op
+BenchmarkLoad/logfmt-16              	      24	  51414366 ns/op	 229.89 MB/s	102099284 B/op	 1446771 allocs/op
+BenchmarkLoad/logfmt-16              	      24	  51425453 ns/op	 229.84 MB/s	102099292 B/op	 1446771 allocs/op
+BenchmarkLoad/logfmt-16              	      24	  50666790 ns/op	 233.28 MB/s	102099284 B/op	 1446771 allocs/op
+BenchmarkLoad/logfmt-16              	      24	  50474786 ns/op	 234.17 MB/s	102099247 B/op	 1446771 allocs/op
+BenchmarkDetect/glog-16              	  295352	      4040 ns/op	    6084 B/op	     100 allocs/op
+BenchmarkDetect/glog-16              	  292274	      4117 ns/op	    6084 B/op	     100 allocs/op
+BenchmarkDetect/glog-16              	  278422	      4101 ns/op	    6084 B/op	     100 allocs/op
+BenchmarkDetect/glog-16              	  295124	      4091 ns/op	    6084 B/op	     100 allocs/op
+BenchmarkDetect/glog-16              	  295959	      3986 ns/op	    6084 B/op	     100 allocs/op
+BenchmarkDetect/json-16              	  138702	      9001 ns/op	   52912 B/op	     118 allocs/op
+BenchmarkDetect/json-16              	  137659	      8895 ns/op	   52912 B/op	     118 allocs/op
+BenchmarkDetect/json-16              	  131858	      9168 ns/op	   52912 B/op	     118 allocs/op
+BenchmarkDetect/json-16              	  134341	      9095 ns/op	   52912 B/op	     118 allocs/op
+BenchmarkDetect/json-16              	  132624	      8964 ns/op	   52912 B/op	     118 allocs/op
+BenchmarkSplitLines-16               	     649	   1842436 ns/op	6183.32 MB/s	 5316612 B/op	       4 allocs/op
+BenchmarkSplitLines-16               	     646	   1877769 ns/op	6066.97 MB/s	 5316612 B/op	       4 allocs/op
+BenchmarkSplitLines-16               	     638	   1864710 ns/op	6109.46 MB/s	 5316612 B/op	       4 allocs/op
+BenchmarkSplitLines-16               	     655	   1855915 ns/op	6138.41 MB/s	 5316611 B/op	       4 allocs/op
+BenchmarkSplitLines-16               	     650	   1860706 ns/op	6122.61 MB/s	 5316612 B/op	       4 allocs/op
+PASS
+ok  	github.com/pgavlin/hustle/log	61.880s
