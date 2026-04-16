@@ -11,7 +11,7 @@ A fast terminal viewer for structured logs.
 - **Quick filter** -- type `/` to search across all fields
 - **jq filter** -- type `:` to apply jq expressions with tab completion
 - **Detail view** -- press Enter on any row to inspect all fields
-- **Sorting** -- click column headers or use keyboard shortcuts
+- **Sorting** -- sort by any column with keyboard shortcuts
 - **Plugin system** -- add custom parsers via regex config files or WASM modules
 
 ## Install
@@ -37,11 +37,13 @@ kubectl logs my-pod | hustle
 cat /var/log/app.json | hustle
 ```
 
-Specify format explicitly:
-```
-hustle --format glog kubernetes.log
-hustle --format logfmt app.log
-```
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--format`, `-f` | Log format: `auto` (default), `json`, `glog`, `clf`, `logfmt`, `cloudwatch` |
+| `--cpuprofile` | Write CPU profile to this path |
+| `--memprofile` | Write memory profile to this path on exit |
 
 ### Keyboard shortcuts
 
@@ -49,12 +51,18 @@ hustle --format logfmt app.log
 |-----|--------|
 | `j` / `Down` | Move down |
 | `k` / `Up` | Move up |
-| `Enter` | View record details |
-| `Escape` | Back to grid / clear filter |
+| `g` | Go to top |
+| `G` | Go to bottom |
+| `Enter` | View record details / sort (on header) |
+| `Escape` | Back to grid / dismiss |
 | `/` | Quick filter (search all columns) |
 | `:` | jq filter expression |
 | `Tab` | Cycle completions (in filter) |
-| `q` | Quit |
+| `Shift+Tab` | Cycle completions backwards |
+| `s` | Sort by focused column |
+| `S` | Multi-column sort |
+| `?` | Toggle help overlay |
+| `q` / `Ctrl+C` | Quit |
 
 ## Formats
 
@@ -67,6 +75,21 @@ hustle auto-detects these formats:
 | **clf** | `127.0.0.1 - - [15/Jun/2024:14:00:03 +0000] "GET / HTTP/1.1" 200 512` |
 | **logfmt** | `time=2024-06-15T14:00:03Z level=info msg="hello" key=value` |
 | **cloudwatch** | `aws logs tail` output or `aws logs filter-log-events` JSON |
+
+### CloudWatch
+
+CloudWatch logs require `--format cloudwatch` because they use document-level
+parsing rather than line-by-line detection. Two input formats are supported:
+
+- **`aws logs tail`** -- line-by-line output (`timestamp stream message`). The
+  inner message is auto-detected as JSON, logfmt, glog, or plain text.
+- **`aws logs filter-log-events`** -- JSON document with an `events` array.
+  Pipe the full JSON output to hustle.
+
+```
+aws logs tail /my/log-group --follow | hustle --format cloudwatch
+aws logs filter-log-events --log-group-name /my/log-group | hustle --format cloudwatch
+```
 
 ## Plugins
 
@@ -117,4 +140,4 @@ Line splitting runs at 6 GB/s with 4 allocations regardless of format.
 
 ## License
 
-MIT
+[MIT](LICENSE)
