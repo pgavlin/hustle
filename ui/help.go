@@ -37,7 +37,7 @@ func renderHelpOverlay() string {
 
 	lines = append(lines, helpSectionStyle.Render("Filtering"))
 	lines = append(lines, binding("/", "Quick filter"))
-	lines = append(lines, binding("j", "jq filter expression"))
+	lines = append(lines, binding(":", "jq filter expression"))
 	lines = append(lines, binding("tab", "Cycle completions"))
 	lines = append(lines, binding("shift+tab", "Cycle back"))
 
