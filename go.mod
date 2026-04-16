@@ -13,6 +13,7 @@ require (
 	github.com/pgavlin/tea-grid v0.0.0-20260409091103-17dbb04ca804
 	github.com/rivo/uniseg v0.4.7
 	github.com/segmentio/encoding v0.5.4
+	github.com/tetratelabs/wazero v1.11.0
 	github.com/urfave/cli/v3 v3.8.0
 )
 

@@ -86,5 +86,9 @@ func loadRegexFormat(path string) (Format, error) {
 }
 
 func loadWASMFormat(path string) (Format, error) {
-	return nil, fmt.Errorf("WASM format loading not yet implemented")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read WASM file: %w", err)
+	}
+	return newWASMFormat(data)
 }
