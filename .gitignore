@@ -9,3 +9,4 @@ examples/wasm-plugin-go/plugin.wasm
 examples/wasm-plugin-rust/plugin.wasm
 examples/wasm-plugin-zig/plugin.wasm
 log/testdata/*.wasm
+log.test

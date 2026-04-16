@@ -48,8 +48,8 @@ func TestWASMFormat_GoPlugin(t *testing.T) {
 	if rec.Msg != "server started" {
 		t.Errorf("msg = %q, want 'server started'", rec.Msg)
 	}
-	if rec.Attrs["port"] != "8080" {
-		t.Errorf("port = %v (%T), want '8080'", rec.Attrs["port"], rec.Attrs["port"])
+	if v, _ := rec.Attrs.Get("port"); v != "8080" {
+		t.Errorf("port = %v (%T), want '8080'", v, v)
 	}
 	if rec.RawJSON != "INFO: server started port=8080" {
 		t.Errorf("RawJSON = %q", rec.RawJSON)
@@ -73,11 +73,11 @@ func TestWASMFormat_RustPlugin(t *testing.T) {
 	if rec.Msg != "connection refused" {
 		t.Errorf("msg = %q, want 'connection refused'", rec.Msg)
 	}
-	if rec.Attrs["host"] != "db.local" {
-		t.Errorf("host = %v, want db.local", rec.Attrs["host"])
+	if v, _ := rec.Attrs.Get("host"); v != "db.local" {
+		t.Errorf("host = %v, want db.local", v)
 	}
-	if rec.Attrs["retries"] != "3" {
-		t.Errorf("retries = %v (%T), want '3'", rec.Attrs["retries"], rec.Attrs["retries"])
+	if v, _ := rec.Attrs.Get("retries"); v != "3" {
+		t.Errorf("retries = %v (%T), want '3'", v, v)
 	}
 }
 
@@ -98,11 +98,11 @@ func TestWASMFormat_ZigPlugin(t *testing.T) {
 	if rec.Msg != "cache miss" {
 		t.Errorf("msg = %q, want 'cache miss'", rec.Msg)
 	}
-	if rec.Attrs["key"] != "user:123" {
-		t.Errorf("key = %v, want user:123", rec.Attrs["key"])
+	if v, _ := rec.Attrs.Get("key"); v != "user:123" {
+		t.Errorf("key = %v, want user:123", v)
 	}
-	if rec.Attrs["ttl"] != "300" {
-		t.Errorf("ttl = %v, want 300", rec.Attrs["ttl"])
+	if v, _ := rec.Attrs.Get("ttl"); v != "300" {
+		t.Errorf("ttl = %v, want 300", v)
 	}
 }
 
@@ -130,8 +130,8 @@ func TestWASMFormat_ParseResult(t *testing.T) {
 	if rec.Time.IsZero() {
 		t.Error("time should not be zero")
 	}
-	if rec.Attrs["port"] != float64(8080) {
-		t.Errorf("port = %v, want 8080", rec.Attrs["port"])
+	if v, _ := rec.Attrs.Get("port"); v != float64(8080) {
+		t.Errorf("port = %v, want 8080", v)
 	}
 }
 

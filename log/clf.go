@@ -38,7 +38,7 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any, 8),
+		Attrs:   make(Attrs, 0, 8),
 	}
 
 	// Parse time
@@ -61,22 +61,22 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 	}
 
 	// Parse request line into method, path, protocol
-	parseRequestLine(sub(5), rec.Attrs)
+	parseRequestLine(sub(5), &rec.Attrs)
 
 	// Attrs
-	rec.Attrs["remote_addr"] = sub(1)
+	rec.Attrs.Set("remote_addr", sub(1))
 	if u := sub(3); u != "-" {
-		rec.Attrs["user"] = u
+		rec.Attrs.Set("user", u)
 	}
-	rec.Attrs["status"] = float64(status)
+	rec.Attrs.Set("status", float64(status))
 	if bytes, err := strconv.ParseFloat(sub(7), 64); err == nil {
-		rec.Attrs["bytes"] = bytes
+		rec.Attrs.Set("bytes", bytes)
 	}
 	if r := sub(8); r != "" && r != "-" {
-		rec.Attrs["referer"] = r
+		rec.Attrs.Set("referer", r)
 	}
 	if ua := sub(9); ua != "" {
-		rec.Attrs["user_agent"] = ua
+		rec.Attrs.Set("user_agent", ua)
 	}
 
 	return rec, nil
@@ -84,36 +84,36 @@ func (f *CLFFormat) ParseRecord(line string) (LogRecord, error) {
 
 // parseRequestLine extracts method, path, protocol, and query parameters
 // from an HTTP request line like "GET /api/v1/users?id=123 HTTP/1.1".
-func parseRequestLine(reqLine string, attrs map[string]any) {
+func parseRequestLine(reqLine string, attrs *Attrs) {
 	parts := strings.SplitN(reqLine, " ", 3)
 	if len(parts) < 2 {
 		return
 	}
 
-	attrs["method"] = parts[0]
+	attrs.Set("method", parts[0])
 
 	rawPath := parts[1]
 	if len(parts) >= 3 {
-		attrs["protocol"] = parts[2]
+		attrs.Set("protocol", parts[2])
 	}
 
 	// Parse path and query string
 	u, err := url.ParseRequestURI(rawPath)
 	if err != nil {
-		attrs["path"] = rawPath
+		attrs.Set("path", rawPath)
 		return
 	}
 
-	attrs["path"] = u.Path
+	attrs.Set("path", u.Path)
 
 	// Extract query parameters as individual attributes
 	if u.RawQuery != "" {
 		params := u.Query()
 		for k, v := range params {
 			if len(v) == 1 {
-				attrs["query."+k] = v[0]
+				attrs.Set("query."+k, v[0])
 			} else {
-				attrs["query."+k] = strings.Join(v, ",")
+				attrs.Set("query."+k, strings.Join(v, ","))
 			}
 		}
 	}

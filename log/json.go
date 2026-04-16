@@ -27,7 +27,7 @@ func (f *JSONFormat) ParseRecord(line string) (LogRecord, error) {
 
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any, 4),
+		Attrs:   make(Attrs, 0, 4),
 	}
 
 	tok := tokPool.Get().(*json.Tokenizer)
@@ -73,14 +73,14 @@ func (f *JSONFormat) ParseRecord(line string) (LogRecord, error) {
 			if rec.Time.IsZero() {
 				rec.Time = parseTokenTime(tok)
 			} else {
-				rec.Attrs[key] = tokenToAny(tok)
+				rec.Attrs.Set(key, tokenToAny(tok))
 			}
 
 		case "level", "severity", "lvl":
 			if rec.Level == "" {
 				rec.Level = parseTokenLevel(tok)
 			} else {
-				rec.Attrs[key] = tokenToAny(tok)
+				rec.Attrs.Set(key, tokenToAny(tok))
 			}
 
 		case "msg", "message", "log":
@@ -90,11 +90,11 @@ func (f *JSONFormat) ParseRecord(line string) (LogRecord, error) {
 					rec.Msg = unsafe.String(unsafe.SliceData(s), len(s))
 				}
 			} else {
-				rec.Attrs[key] = tokenToAny(tok)
+				rec.Attrs.Set(key, tokenToAny(tok))
 			}
 
 		default:
-			rec.Attrs[key] = tokenToAny(tok)
+			rec.Attrs.Set(key, tokenToAny(tok))
 		}
 	}
 

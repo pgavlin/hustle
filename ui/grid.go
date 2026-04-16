@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -103,16 +102,16 @@ func logColumns() []data.Column[logpkg.LogRecord] {
 			},
 			QuickFilterMatch: func(r *logpkg.LogRecord, word string) bool {
 				// Search keys and values directly without sorting or formatting
-				for k, v := range r.Attrs {
-					if containsFold(k, word) {
+				for _, kv := range r.Attrs {
+					if containsFold(kv.Key, word) {
 						return true
 					}
-					if s, ok := v.(string); ok {
+					if s, ok := kv.Value.(string); ok {
 						if containsFold(s, word) {
 							return true
 						}
 					} else {
-						if containsFold(fmt.Sprint(v), word) {
+						if containsFold(fmt.Sprint(kv.Value), word) {
 							return true
 						}
 					}
@@ -150,19 +149,14 @@ func newLogGrid(records []logpkg.LogRecord, width, height int, extFilter func(lo
 	return grid.New(opts...)
 }
 
-func formatAttrs(attrs map[string]any) string {
+func formatAttrs(attrs logpkg.Attrs) string {
 	if len(attrs) == 0 {
 		return ""
 	}
-	keys := make([]string, 0, len(attrs))
-	for k := range attrs {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
 
-	parts := make([]string, 0, len(keys))
-	for _, k := range keys {
-		parts = append(parts, fmt.Sprintf("%s=%v", k, attrs[k]))
+	parts := make([]string, 0, len(attrs))
+	for _, kv := range attrs {
+		parts = append(parts, fmt.Sprintf("%s=%v", kv.Key, kv.Value))
 	}
 	return strings.Join(parts, ", ")
 }

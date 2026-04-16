@@ -8,11 +8,15 @@ import (
 )
 
 func rec(level, msg string, attrs map[string]any) logpkg.LogRecord {
+	var a logpkg.Attrs
+	for k, v := range attrs {
+		a.Set(k, v)
+	}
 	return logpkg.LogRecord{
 		Time:  time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC),
 		Level: level,
 		Msg:   msg,
-		Attrs: attrs,
+		Attrs: a,
 	}
 }
 

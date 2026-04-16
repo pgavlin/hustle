@@ -75,8 +75,8 @@ func TestRegexFormat_ExtraGroupsAsAttrs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rec.Attrs["pid"] != float64(12345) {
-		t.Errorf("pid = %v, want 12345", rec.Attrs["pid"])
+	if v, _ := rec.Attrs.Get("pid"); v != float64(12345) {
+		t.Errorf("pid = %v, want 12345", v)
 	}
 }
 

@@ -116,15 +116,15 @@ func (f *GlogFormat) ParseRecord(line string) (LogRecord, error) {
 		Level:   level,
 		Msg:     msg,
 		Time:    parseGlogTime(datePart, timePart),
-		Attrs:   make(map[string]any, 4),
+		Attrs:   make(Attrs, 0, 4),
 	}
 
 	if tid, err := strconv.ParseFloat(tidStr, 64); err == nil {
-		rec.Attrs["thread_id"] = tid
+		rec.Attrs.Set("thread_id", tid)
 	}
-	rec.Attrs["file"] = file
+	rec.Attrs.Set("file", file)
 	if lineNo, err := strconv.ParseFloat(lineNoStr, 64); err == nil {
-		rec.Attrs["line"] = lineNo
+		rec.Attrs.Set("line", lineNo)
 	}
 
 	// Check for klog structured message
@@ -214,7 +214,7 @@ func parseKlogStructuredMessage(rec *LogRecord) {
 		return
 	}
 
-	if !parseLogfmtAttrs(rest, rec.Attrs) {
+	if !parseLogfmtAttrs(rest, &rec.Attrs) {
 		return // not structured — keep original message
 	}
 	rec.Msg = quotedMsg

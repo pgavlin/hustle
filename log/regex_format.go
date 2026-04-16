@@ -50,7 +50,7 @@ func (f *RegexFormat) ParseRecord(line string) (LogRecord, error) {
 	}
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any, len(f.groupNames)),
+		Attrs:   make(Attrs, 0, len(f.groupNames)),
 	}
 	for i, name := range f.groupNames {
 		if name == "" || i*2 >= len(match) {
@@ -69,7 +69,7 @@ func (f *RegexFormat) ParseRecord(line string) (LogRecord, error) {
 		case "msg":
 			rec.Msg = value
 		default:
-			rec.Attrs[name] = inferValue(value)
+			rec.Attrs.Set(name, inferValue(value))
 		}
 	}
 	return rec, nil

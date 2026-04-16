@@ -40,9 +40,9 @@ func (f *CloudWatchFormat) ParseRecord(line string) (LogRecord, error) {
 		rec.Time = ts
 	}
 	rec.RawJSON = line
-	rec.Attrs["log_stream"] = stream
+	rec.Attrs.Set("log_stream", stream)
 	if innerFormat != "" {
-		rec.Attrs["inner_format"] = innerFormat
+		rec.Attrs.Set("inner_format", innerFormat)
 	}
 
 	return rec, nil
@@ -81,10 +81,10 @@ func LoadCloudWatchJSON(r io.Reader) ([]LogRecord, int, Format, error) {
 
 		// Merge CloudWatch metadata
 		if evt.LogStreamName != "" {
-			rec.Attrs["log_stream"] = evt.LogStreamName
+			rec.Attrs.Set("log_stream", evt.LogStreamName)
 		}
 		if evt.EventID != "" {
-			rec.Attrs["event_id"] = evt.EventID
+			rec.Attrs.Set("event_id", evt.EventID)
 		}
 
 		records = append(records, rec)
@@ -130,6 +130,6 @@ func parseInnerMessage(message string) (LogRecord, string) {
 	// No format matched — treat the whole message as plain text
 	return LogRecord{
 		Msg:   message,
-		Attrs: make(map[string]any, 4),
+		Attrs: make(Attrs, 0, 4),
 	}, ""
 }

@@ -9,7 +9,7 @@ import (
 
 func TestInferShape_BasicFields(t *testing.T) {
 	records := []logpkg.LogRecord{
-		{Time: time.Now(), Level: "INFO", Msg: "hello", Attrs: map[string]any{"port": float64(8080)}},
+		{Time: time.Now(), Level: "INFO", Msg: "hello", Attrs: logpkg.Attrs{{Key: "port", Value: float64(8080)}}},
 	}
 	shape := InferShape(records)
 	obj, ok := shape.(ObjectShape)
@@ -36,9 +36,7 @@ func TestInferShape_BasicFields(t *testing.T) {
 
 func TestInferShape_NestedObject(t *testing.T) {
 	records := []logpkg.LogRecord{
-		{Attrs: map[string]any{
-			"headers": map[string]any{"content-type": "application/json"},
-		}},
+		{Attrs: logpkg.Attrs{{Key: "headers", Value: map[string]any{"content-type": "application/json"}}}},
 	}
 	shape := InferShape(records)
 	obj := shape.(ObjectShape)
@@ -53,8 +51,8 @@ func TestInferShape_NestedObject(t *testing.T) {
 
 func TestInferShape_MixedTypes(t *testing.T) {
 	records := []logpkg.LogRecord{
-		{Attrs: map[string]any{"value": "hello"}},
-		{Attrs: map[string]any{"value": float64(42)}},
+		{Attrs: logpkg.Attrs{{Key: "value", Value: "hello"}}},
+		{Attrs: logpkg.Attrs{{Key: "value", Value: float64(42)}}},
 	}
 	shape := InferShape(records)
 	obj := shape.(ObjectShape)
@@ -66,7 +64,7 @@ func TestInferShape_MixedTypes(t *testing.T) {
 
 func TestInferShape_ArrayField(t *testing.T) {
 	records := []logpkg.LogRecord{
-		{Attrs: map[string]any{"tags": []any{"a", "b", "c"}}},
+		{Attrs: logpkg.Attrs{{Key: "tags", Value: []any{"a", "b", "c"}}}},
 	}
 	shape := InferShape(records)
 	obj := shape.(ObjectShape)
@@ -92,8 +90,8 @@ func TestInferShape_EmptyRecords(t *testing.T) {
 
 func TestInferShape_MergesAcrossRecords(t *testing.T) {
 	records := []logpkg.LogRecord{
-		{Attrs: map[string]any{"port": float64(8080)}},
-		{Attrs: map[string]any{"host": "localhost"}},
+		{Attrs: logpkg.Attrs{{Key: "port", Value: float64(8080)}}},
+		{Attrs: logpkg.Attrs{{Key: "host", Value: "localhost"}}},
 	}
 	shape := InferShape(records)
 	obj := shape.(ObjectShape)

@@ -13,7 +13,7 @@ func testRecord() logpkg.LogRecord {
 		Time:    time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC),
 		Level:   "INFO",
 		Msg:     "server started",
-		Attrs:   map[string]any{"port": float64(8080), "host": "localhost"},
+		Attrs:   logpkg.Attrs{{Key: "port", Value: float64(8080)}, {Key: "host", Value: "localhost"}},
 		RawJSON: `{"time":"2024-01-15T10:30:00Z","level":"INFO","msg":"server started","port":8080,"host":"localhost"}`,
 	}
 }

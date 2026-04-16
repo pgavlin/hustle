@@ -14,7 +14,7 @@ func (f *LogfmtFormat) Name() string { return "logfmt" }
 func (f *LogfmtFormat) ParseRecord(line string) (LogRecord, error) {
 	rec := LogRecord{
 		RawJSON: line,
-		Attrs:   make(map[string]any, 4),
+		Attrs:   make(Attrs, 0, 4),
 	}
 
 	found := false
@@ -66,7 +66,7 @@ func (f *LogfmtFormat) ParseRecord(line string) (LogRecord, error) {
 		case "msg", "message":
 			rec.Msg = value
 		default:
-			rec.Attrs[key] = inferValue(value)
+			rec.Attrs.Set(key, inferValue(value))
 		}
 	}
 
@@ -146,7 +146,7 @@ func looksNumeric(c byte) bool {
 
 // parseLogfmtAttrs parses key=value pairs from s and adds them to attrs.
 // Returns true if at least one pair was found.
-func parseLogfmtAttrs(s string, attrs map[string]any) bool {
+func parseLogfmtAttrs(s string, attrs *Attrs) bool {
 	found := false
 	i := 0
 	for i < len(s) {
@@ -179,7 +179,7 @@ func parseLogfmtAttrs(s string, attrs map[string]any) bool {
 			value = s[valStart:i]
 		}
 
-		attrs[key] = inferValue(value)
+		attrs.Set(key, inferValue(value))
 		found = true
 	}
 	return found

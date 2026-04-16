@@ -46,8 +46,8 @@ func recordToMap(rec logpkg.LogRecord) map[string]any {
 	m["time"] = rec.Time.Format(time.RFC3339Nano)
 	m["level"] = rec.Level
 	m["msg"] = rec.Msg
-	for k, v := range rec.Attrs {
-		m[k] = v
+	for _, kv := range rec.Attrs {
+		m[kv.Key] = kv.Value
 	}
 	return m
 }

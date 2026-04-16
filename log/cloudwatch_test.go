@@ -18,11 +18,11 @@ func TestCloudWatch_TailFormatJSON(t *testing.T) {
 	if rec.Msg != "hello" {
 		t.Errorf("msg = %q, want hello", rec.Msg)
 	}
-	if rec.Attrs["port"] != float64(8080) {
-		t.Errorf("port = %v, want 8080", rec.Attrs["port"])
+	if v, _ := rec.Attrs.Get("port"); v != float64(8080) {
+		t.Errorf("port = %v, want 8080", v)
 	}
-	if rec.Attrs["log_stream"] != "my-group/my-stream/abc123" {
-		t.Errorf("log_stream = %v", rec.Attrs["log_stream"])
+	if v, _ := rec.Attrs.Get("log_stream"); v != "my-group/my-stream/abc123" {
+		t.Errorf("log_stream = %v", v)
 	}
 	if rec.Time.Year() != 2024 {
 		t.Errorf("time = %v", rec.Time)
@@ -103,14 +103,14 @@ func TestCloudWatch_JSONDocument(t *testing.T) {
 	if records[0].Msg != "hello" {
 		t.Errorf("records[0].msg = %q, want hello", records[0].Msg)
 	}
-	if records[0].Attrs["port"] != float64(8080) {
-		t.Errorf("records[0].port = %v, want 8080", records[0].Attrs["port"])
+	if v, _ := records[0].Attrs.Get("port"); v != float64(8080) {
+		t.Errorf("records[0].port = %v, want 8080", v)
 	}
-	if records[0].Attrs["log_stream"] != "my-service/abc123" {
-		t.Errorf("records[0].log_stream = %v", records[0].Attrs["log_stream"])
+	if v, _ := records[0].Attrs.Get("log_stream"); v != "my-service/abc123" {
+		t.Errorf("records[0].log_stream = %v", v)
 	}
-	if records[0].Attrs["event_id"] != "evt-001" {
-		t.Errorf("records[0].event_id = %v", records[0].Attrs["event_id"])
+	if v, _ := records[0].Attrs.Get("event_id"); v != "evt-001" {
+		t.Errorf("records[0].event_id = %v", v)
 	}
 
 	// Second record

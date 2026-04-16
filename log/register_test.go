@@ -82,8 +82,8 @@ time_format = "2006-01-02T15:04:05Z"
 	if rec.Msg != "user logged in" {
 		t.Errorf("msg = %q", rec.Msg)
 	}
-	if rec.Attrs["component"] != "auth" {
-		t.Errorf("component = %v, want auth", rec.Attrs["component"])
+	if v, _ := rec.Attrs.Get("component"); v != "auth" {
+		t.Errorf("component = %v, want auth", v)
 	}
 	if rec.Time.Year() != 2024 {
 		t.Errorf("time = %v", rec.Time)

@@ -17,8 +17,8 @@ func TestLogfmt_Standard(t *testing.T) {
 	if rec.Time.IsZero() {
 		t.Error("time should not be zero")
 	}
-	if rec.Attrs["port"] != float64(8080) {
-		t.Errorf("port = %v, want 8080", rec.Attrs["port"])
+	if v, _ := rec.Attrs.Get("port"); v != float64(8080) {
+		t.Errorf("port = %v, want 8080", v)
 	}
 }
 
@@ -31,8 +31,8 @@ func TestLogfmt_QuotedValues(t *testing.T) {
 	if rec.Msg != "something went wrong" {
 		t.Errorf("msg = %q", rec.Msg)
 	}
-	if rec.Attrs["path"] != "/api/v1/users" {
-		t.Errorf("path = %v", rec.Attrs["path"])
+	if v, _ := rec.Attrs.Get("path"); v != "/api/v1/users" {
+		t.Errorf("path = %v", v)
 	}
 }
 
@@ -42,11 +42,11 @@ func TestLogfmt_BoolAndNumber(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rec.Attrs["active"] != true {
-		t.Errorf("active = %v, want true", rec.Attrs["active"])
+	if v, _ := rec.Attrs.Get("active"); v != true {
+		t.Errorf("active = %v, want true", v)
 	}
-	if rec.Attrs["count"] != float64(42) {
-		t.Errorf("count = %v, want 42", rec.Attrs["count"])
+	if v, _ := rec.Attrs.Get("count"); v != float64(42) {
+		t.Errorf("count = %v, want 42", v)
 	}
 }
 
@@ -59,8 +59,8 @@ func TestLogfmt_MissingFields(t *testing.T) {
 	if rec.Level != "" {
 		t.Errorf("level should be empty, got %q", rec.Level)
 	}
-	if rec.Attrs["key"] != "value" {
-		t.Errorf("key = %v, want value", rec.Attrs["key"])
+	if v, _ := rec.Attrs.Get("key"); v != "value" {
+		t.Errorf("key = %v, want value", v)
 	}
 }
 

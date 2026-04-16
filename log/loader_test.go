@@ -34,8 +34,8 @@ func TestLoad_ValidFile(t *testing.T) {
 	if lf.Records[0].Msg != "hello" {
 		t.Errorf("Records[0].Msg = %q, want %q", lf.Records[0].Msg, "hello")
 	}
-	if lf.Records[1].Attrs["code"] != float64(500) {
-		t.Errorf("Records[1].Attrs[code] = %v, want 500", lf.Records[1].Attrs["code"])
+	if v, _ := lf.Records[1].Attrs.Get("code"); v != float64(500) {
+		t.Errorf("Records[1].Attrs[code] = %v, want 500", v)
 	}
 }
 

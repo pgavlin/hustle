@@ -29,14 +29,14 @@ func InferShape(records []logpkg.LogRecord) Shape {
 		// Skip time and msg — always high cardinality.
 		trackValue(fieldValues, "level", rec.Level)
 
-		for k, v := range rec.Attrs {
-			s := inferValue(v)
-			if existing, ok := base.Fields[k]; ok {
-				base.Fields[k] = Merge(InnerShape(existing), s)
+		for _, kv := range rec.Attrs {
+			s := inferValue(kv.Value)
+			if existing, ok := base.Fields[kv.Key]; ok {
+				base.Fields[kv.Key] = Merge(InnerShape(existing), s)
 			} else {
-				base.Fields[k] = s
+				base.Fields[kv.Key] = s
 			}
-			trackValue(fieldValues, k, fmt.Sprint(v))
+			trackValue(fieldValues, kv.Key, fmt.Sprint(kv.Value))
 		}
 	}
 

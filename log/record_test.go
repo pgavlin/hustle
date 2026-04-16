@@ -21,11 +21,11 @@ func TestParseRecord_ValidFullRecord(t *testing.T) {
 	if !rec.Time.Equal(expectedTime) {
 		t.Errorf("time = %v, want %v", rec.Time, expectedTime)
 	}
-	if rec.Attrs["port"] != float64(8080) {
-		t.Errorf("attrs[port] = %v, want %v", rec.Attrs["port"], float64(8080))
+	if v, _ := rec.Attrs.Get("port"); v != float64(8080) {
+		t.Errorf("attrs[port] = %v, want %v", v, float64(8080))
 	}
-	if rec.Attrs["host"] != "localhost" {
-		t.Errorf("attrs[host] = %v, want %v", rec.Attrs["host"], "localhost")
+	if v, _ := rec.Attrs.Get("host"); v != "localhost" {
+		t.Errorf("attrs[host] = %v, want %v", v, "localhost")
 	}
 	if rec.RawJSON != line {
 		t.Errorf("rawJSON mismatch")
@@ -47,8 +47,8 @@ func TestParseRecord_MissingStandardFields(t *testing.T) {
 	if rec.Msg != "" {
 		t.Errorf("msg should be empty, got %q", rec.Msg)
 	}
-	if rec.Attrs["extra"] != "value" {
-		t.Errorf("attrs[extra] = %v, want %q", rec.Attrs["extra"], "value")
+	if v, _ := rec.Attrs.Get("extra"); v != "value" {
+		t.Errorf("attrs[extra] = %v, want %q", v, "value")
 	}
 }
 
@@ -58,9 +58,10 @@ func TestParseRecord_NestedAttrs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	headers, ok := rec.Attrs["headers"].(map[string]any)
+	headersVal, _ := rec.Attrs.Get("headers")
+	headers, ok := headersVal.(map[string]any)
 	if !ok {
-		t.Fatalf("attrs[headers] is not a map, got %T", rec.Attrs["headers"])
+		t.Fatalf("attrs[headers] is not a map, got %T", headersVal)
 	}
 	if headers["content-type"] != "application/json" {
 		t.Errorf("headers[content-type] = %v, want %q", headers["content-type"], "application/json")

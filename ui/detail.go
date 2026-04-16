@@ -3,7 +3,6 @@ package ui
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -136,14 +135,8 @@ func (m DetailModel) structuredView() string {
 		b.WriteString(strings.Repeat("─", 40))
 		b.WriteString("\n")
 
-		keys := make([]string, 0, len(m.record.Attrs))
-		for k := range m.record.Attrs {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-
-		for _, k := range keys {
-			writeField(k, formatAttrValue(m.record.Attrs[k]))
+		for _, kv := range m.record.Attrs {
+			writeField(kv.Key, formatAttrValue(kv.Value))
 		}
 	}
 

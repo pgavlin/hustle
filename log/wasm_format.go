@@ -171,10 +171,10 @@ func parseWASMResult(data []byte) (LogRecord, error) {
 	rec := LogRecord{
 		Level: normalizeLevel(result.Level),
 		Msg:   result.Msg,
-		Attrs: result.Attrs,
+		Attrs: make(Attrs, 0, len(result.Attrs)),
 	}
-	if rec.Attrs == nil {
-		rec.Attrs = make(map[string]any)
+	for k, v := range result.Attrs {
+		rec.Attrs.Set(k, v)
 	}
 	if result.Time != "" {
 		rec.Time = parseTimeString(result.Time)

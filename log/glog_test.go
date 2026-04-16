@@ -20,14 +20,14 @@ func TestGlog_Info(t *testing.T) {
 	if rec.Time.Month() != time.January || rec.Time.Day() != 15 {
 		t.Errorf("time = %v, want Jan 15", rec.Time)
 	}
-	if rec.Attrs["file"] != "server.go" {
-		t.Errorf("file = %v", rec.Attrs["file"])
+	if v, _ := rec.Attrs.Get("file"); v != "server.go" {
+		t.Errorf("file = %v", v)
 	}
-	if rec.Attrs["line"] != float64(42) {
-		t.Errorf("line = %v", rec.Attrs["line"])
+	if v, _ := rec.Attrs.Get("line"); v != float64(42) {
+		t.Errorf("line = %v", v)
 	}
-	if rec.Attrs["thread_id"] != float64(12345) {
-		t.Errorf("thread_id = %v", rec.Attrs["thread_id"])
+	if v, _ := rec.Attrs.Get("thread_id"); v != float64(12345) {
+		t.Errorf("thread_id = %v", v)
 	}
 }
 
@@ -84,11 +84,11 @@ func TestGlog_KlogStructured(t *testing.T) {
 	if rec.Msg != "Pod status updated" {
 		t.Errorf("msg = %q, want 'Pod status updated'", rec.Msg)
 	}
-	if rec.Attrs["pod"] != "kube-system/kubedns" {
-		t.Errorf("pod = %v", rec.Attrs["pod"])
+	if v, _ := rec.Attrs.Get("pod"); v != "kube-system/kubedns" {
+		t.Errorf("pod = %v", v)
 	}
-	if rec.Attrs["status"] != "ready" {
-		t.Errorf("status = %v", rec.Attrs["status"])
+	if v, _ := rec.Attrs.Get("status"); v != "ready" {
+		t.Errorf("status = %v", v)
 	}
 }
 
@@ -101,11 +101,11 @@ func TestGlog_KlogStructuredNumericValue(t *testing.T) {
 	if rec.Msg != "Sync failed" {
 		t.Errorf("msg = %q, want 'Sync failed'", rec.Msg)
 	}
-	if rec.Attrs["retries"] != float64(3) {
-		t.Errorf("retries = %v, want 3", rec.Attrs["retries"])
+	if v, _ := rec.Attrs.Get("retries"); v != float64(3) {
+		t.Errorf("retries = %v, want 3", v)
 	}
-	if rec.Attrs["duration"] != 1.5 {
-		t.Errorf("duration = %v, want 1.5", rec.Attrs["duration"])
+	if v, _ := rec.Attrs.Get("duration"); v != 1.5 {
+		t.Errorf("duration = %v, want 1.5", v)
 	}
 }
 
