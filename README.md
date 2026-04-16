@@ -52,7 +52,7 @@ hustle --format logfmt app.log
 | `Enter` | View record details |
 | `Escape` | Back to grid / clear filter |
 | `/` | Quick filter (search all columns) |
-| `:` | jq filter expression |
+| `j` | jq filter expression |
 | `Tab` | Cycle completions (in filter) |
 | `q` | Quit |
 

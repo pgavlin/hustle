@@ -42,7 +42,7 @@ Escape
 Sleep 1s
 
 # jq filter: find slow requests (duration > 200ms)
-Type ":"
+Type "j"
 Sleep 500ms
 Type ".duration_ms > 200"
 Sleep 2s
@@ -50,7 +50,7 @@ Enter
 Sleep 4s
 
 # Clear jq filter
-Type ":"
+Type "j"
 Sleep 500ms
 Ctrl+U
 Enter
