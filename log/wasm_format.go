@@ -1,12 +1,9 @@
 package log
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/tetratelabs/wazero"
@@ -14,41 +11,9 @@ import (
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
 
-// newWASMFormat loads a WASM module and returns a Format implementation.
-// It auto-detects whether the module uses the export-based ABI (name/parse/alloc/dealloc)
-// or the WASI stdio ABI (reads stdin, writes stdout). The fallbackName is used for
-// stdio modules that can't self-report their name.
-func newWASMFormat(wasmBytes []byte, fallbackName string) (Format, error) {
-	ctx := context.Background()
-	rt := wazero.NewRuntime(ctx)
-
-	wasi_snapshot_preview1.MustInstantiate(ctx, rt)
-
-	compiled, err := rt.CompileModule(ctx, wasmBytes)
-	if err != nil {
-		rt.Close(ctx)
-		return nil, fmt.Errorf("compile WASM module: %w", err)
-	}
-
-	// Probe for export-based ABI by checking exported function names.
-	exports := compiled.ExportedFunctions()
-	_, hasName := exports["name"]
-	_, hasParse := exports["parse"]
-	_, hasAlloc := exports["alloc"]
-	_, hasDealloc := exports["dealloc"]
-
-	if hasName && hasParse && hasAlloc && hasDealloc {
-		return newExportWASMFormat(ctx, rt, compiled)
-	}
-
-	// Fall back to stdio ABI (e.g. Javy-compiled JS modules).
-	return newStdioWASMFormat(rt, compiled, fallbackName)
-}
-
-// --- Export-based ABI (Go/Rust plugins) ---
-
-// wasmExportFormat implements Format using exported name/parse/alloc/dealloc functions.
-type wasmExportFormat struct {
+// WASMFormat implements Format by delegating to a WASM module that exports
+// the hustle plugin ABI: name, parse, alloc, dealloc.
+type WASMFormat struct {
 	name    string
 	runtime wazero.Runtime
 	module  api.Module
@@ -57,11 +22,27 @@ type wasmExportFormat struct {
 	parse   api.Function
 }
 
+// unpack splits a packed u64 return value into (ptr, len).
+// Low 32 bits = ptr, high 32 bits = len.
 func unpack(v uint64) (uint32, uint32) {
 	return uint32(v), uint32(v >> 32)
 }
 
-func newExportWASMFormat(ctx context.Context, rt wazero.Runtime, compiled wazero.CompiledModule) (*wasmExportFormat, error) {
+func newWASMFormat(wasmBytes []byte) (*WASMFormat, error) {
+	ctx := context.Background()
+	rt := wazero.NewRuntime(ctx)
+
+	// Instantiate WASI if the module needs it (e.g. TinyGo-compiled modules).
+	wasi_snapshot_preview1.MustInstantiate(ctx, rt)
+
+	compiled, err := rt.CompileModule(ctx, wasmBytes)
+	if err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("compile WASM module: %w", err)
+	}
+
+	// Don't run _start automatically — TinyGo's main() calls proc_exit which
+	// would close the module. We just need the exported functions.
 	cfg := wazero.NewModuleConfig().WithStartFunctions()
 	mod, err := rt.InstantiateModule(ctx, compiled, cfg)
 	if err != nil {
@@ -74,6 +55,26 @@ func newExportWASMFormat(ctx context.Context, rt wazero.Runtime, compiled wazero
 	allocFn := mod.ExportedFunction("alloc")
 	deallocFn := mod.ExportedFunction("dealloc")
 
+	if nameFn == nil || parseFn == nil || allocFn == nil || deallocFn == nil {
+		missing := ""
+		if nameFn == nil {
+			missing += "name "
+		}
+		if parseFn == nil {
+			missing += "parse "
+		}
+		if allocFn == nil {
+			missing += "alloc "
+		}
+		if deallocFn == nil {
+			missing += "dealloc "
+		}
+		rt.Close(ctx)
+		return nil, fmt.Errorf("WASM module missing required exports: %s", missing)
+	}
+
+	// Call name() to get the format name.
+	// Returns a packed u64: low 32 bits = ptr, high 32 bits = len.
 	results, err := nameFn.Call(ctx)
 	if err != nil {
 		rt.Close(ctx)
@@ -90,7 +91,7 @@ func newExportWASMFormat(ctx context.Context, rt wazero.Runtime, compiled wazero
 		return nil, fmt.Errorf("failed to read name from WASM memory")
 	}
 
-	return &wasmExportFormat{
+	return &WASMFormat{
 		name:    string(nameBytes),
 		runtime: rt,
 		module:  mod,
@@ -100,11 +101,12 @@ func newExportWASMFormat(ctx context.Context, rt wazero.Runtime, compiled wazero
 	}, nil
 }
 
-func (f *wasmExportFormat) Name() string { return f.name }
+func (f *WASMFormat) Name() string { return f.name }
 
-func (f *wasmExportFormat) ParseRecord(line string) (LogRecord, error) {
+func (f *WASMFormat) ParseRecord(line string) (LogRecord, error) {
 	ctx := context.Background()
 
+	// Allocate memory in the module for the input line.
 	lineBytes := []byte(line)
 	lineSize := uint64(len(lineBytes))
 	results, err := f.alloc.Call(ctx, lineSize)
@@ -118,6 +120,7 @@ func (f *wasmExportFormat) ParseRecord(line string) (LogRecord, error) {
 		return LogRecord{}, fmt.Errorf("failed to write line to WASM memory")
 	}
 
+	// Call parse(ptr, len) -> packed u64 (result_ptr | result_len << 32).
 	results, err = f.parse.Call(ctx, uint64(linePtr), lineSize)
 	if err != nil {
 		return LogRecord{}, fmt.Errorf("parse: %w", err)
@@ -141,76 +144,12 @@ func (f *wasmExportFormat) ParseRecord(line string) (LogRecord, error) {
 	return rec, nil
 }
 
-func (f *wasmExportFormat) Close() error {
+// Close releases the WASM runtime resources.
+func (f *WASMFormat) Close() error {
 	return f.runtime.Close(context.Background())
 }
 
-// --- Stdio-based ABI (Javy/JS plugins) ---
-
-// wasmStdioFormat implements Format by instantiating a WASI module per call,
-// passing the line on stdin and reading the JSON result from stdout.
-type wasmStdioFormat struct {
-	name     string
-	runtime  wazero.Runtime
-	compiled wazero.CompiledModule
-	mu       sync.Mutex // wazero runtimes are not safe for concurrent instantiation
-}
-
-func newStdioWASMFormat(rt wazero.Runtime, compiled wazero.CompiledModule, name string) (*wasmStdioFormat, error) {
-	return &wasmStdioFormat{
-		name:     name,
-		runtime:  rt,
-		compiled: compiled,
-	}, nil
-}
-
-func (f *wasmStdioFormat) Name() string { return f.name }
-
-func (f *wasmStdioFormat) ParseRecord(line string) (LogRecord, error) {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-
-	ctx := context.Background()
-
-	stdin := bytes.NewReader([]byte(line))
-	var stdout bytes.Buffer
-
-	var stderr bytes.Buffer
-	cfg := wazero.NewModuleConfig().
-		WithName("").
-		WithStdin(stdin).
-		WithStdout(&stdout).
-		WithStderr(&stderr)
-
-	mod, err := f.runtime.InstantiateModule(ctx, f.compiled, cfg)
-	if err != nil {
-		// Modules that call proc_exit(0) return an exit error — that's normal.
-		if !strings.Contains(err.Error(), "exit_code(0)") {
-			errMsg := stderr.String()
-			if errMsg != "" {
-				return LogRecord{}, fmt.Errorf("run WASM module: %w\nstderr: %s", err, errMsg)
-			}
-			return LogRecord{}, fmt.Errorf("run WASM module: %w", err)
-		}
-	}
-	if mod != nil {
-		mod.Close(ctx)
-	}
-
-	rec, err := parseWASMResult(stdout.Bytes())
-	if err != nil {
-		return LogRecord{}, err
-	}
-	rec.RawJSON = line
-	return rec, nil
-}
-
-func (f *wasmStdioFormat) Close() error {
-	return f.runtime.Close(context.Background())
-}
-
-// --- Shared result parsing ---
-
+// wasmResult is the JSON structure returned by the WASM parse function.
 type wasmResult struct {
 	OK    bool           `json:"ok"`
 	Error string         `json:"error,omitempty"`
@@ -220,6 +159,7 @@ type wasmResult struct {
 	Attrs map[string]any `json:"attrs,omitempty"`
 }
 
+// parseWASMResult decodes a JSON result from a WASM parse call.
 func parseWASMResult(data []byte) (LogRecord, error) {
 	var result wasmResult
 	if err := json.Unmarshal(data, &result); err != nil {
@@ -242,6 +182,7 @@ func parseWASMResult(data []byte) (LogRecord, error) {
 	return rec, nil
 }
 
+// parseTimeString tries common time formats.
 func parseTimeString(s string) time.Time {
 	for _, layout := range []string{
 		time.RFC3339Nano,

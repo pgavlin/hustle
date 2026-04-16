@@ -1,7 +1,6 @@
 package log
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -17,24 +16,18 @@ func testdataDir(t *testing.T) string {
 	return filepath.Join(filepath.Dir(file), "testdata")
 }
 
-func loadTestWASM(t *testing.T, name string) Format {
+func loadTestWASM(t *testing.T, name string) *WASMFormat {
 	t.Helper()
 	wasmPath := filepath.Join(testdataDir(t), name)
 	data, err := os.ReadFile(wasmPath)
 	if err != nil {
 		t.Skipf("WASM test fixture not found: %v", err)
 	}
-	// Use filename (without extension) as fallback name for stdio modules.
-	fallback := name[:len(name)-len(filepath.Ext(name))]
-	f, err := newWASMFormat(data, fallback)
+	f, err := newWASMFormat(data)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		if c, ok := f.(io.Closer); ok {
-			c.Close()
-		}
-	})
+	t.Cleanup(func() { f.Close() })
 	return f
 }
 
@@ -85,32 +78,6 @@ func TestWASMFormat_RustPlugin(t *testing.T) {
 	}
 	if rec.Attrs["retries"] != "3" {
 		t.Errorf("retries = %v (%T), want '3'", rec.Attrs["retries"], rec.Attrs["retries"])
-	}
-}
-
-func TestWASMFormat_JSPlugin(t *testing.T) {
-	f := loadTestWASM(t, "example-js.wasm")
-
-	// Stdio modules use the filename as the format name.
-	if f.Name() != "example-js" {
-		t.Errorf("name = %q, want example-js", f.Name())
-	}
-
-	rec, err := f.ParseRecord("WARN: disk usage high percent=92")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if rec.Level != "WARN" {
-		t.Errorf("level = %q, want WARN", rec.Level)
-	}
-	if rec.Msg != "disk usage high" {
-		t.Errorf("msg = %q, want 'disk usage high'", rec.Msg)
-	}
-	if rec.Attrs["percent"] != "92" {
-		t.Errorf("percent = %v (%T), want '92'", rec.Attrs["percent"], rec.Attrs["percent"])
-	}
-	if rec.RawJSON != "WARN: disk usage high percent=92" {
-		t.Errorf("RawJSON = %q", rec.RawJSON)
 	}
 }
 
