@@ -64,9 +64,10 @@ func detectFormatFromLines(lines []string) (Format, error) {
 		return &JSONFormat{}, nil
 	}
 
-	// Exclude CloudWatch from line-by-line detection (needs document-level handling)
-	lineFormats := Formats[:len(Formats)-1]
-	for _, f := range lineFormats {
+	for _, f := range Formats {
+		if _, ok := f.(DocumentFormat); ok {
+			continue
+		}
 		parsed := 0
 		for _, line := range sample {
 			if _, err := f.ParseRecord(line); err == nil {

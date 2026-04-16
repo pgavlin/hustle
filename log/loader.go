@@ -41,8 +41,8 @@ func Load(path string, format Format) (*LogFile, error) {
 	}
 	defer f.Close()
 
-	// CloudWatch needs document-level JSON parsing; stream it directly.
-	if _, ok := format.(*CloudWatchFormat); ok {
+	// Document formats need special handling; stream them directly.
+	if _, ok := format.(DocumentFormat); ok {
 		records, skipped, fmt, err := LoadCloudWatchJSON(f)
 		if err != nil {
 			return nil, err
@@ -80,8 +80,8 @@ func LoadReader(r io.Reader, format Format) (*LogFile, error) {
 		return nil, fmt.Errorf("read: %w", err)
 	}
 
-	// CloudWatch needs document-level JSON parsing.
-	if _, ok := format.(*CloudWatchFormat); ok {
+	// Document formats need special handling.
+	if _, ok := format.(DocumentFormat); ok {
 		records, skipped, fmt, err := LoadCloudWatchJSON(bytes.NewReader(data))
 		if err != nil {
 			return nil, err

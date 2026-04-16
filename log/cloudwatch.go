@@ -15,6 +15,8 @@ type CloudWatchFormat struct{}
 
 func (f *CloudWatchFormat) Name() string { return "cloudwatch" }
 
+func (f *CloudWatchFormat) IsDocumentFormat() {}
+
 // ParseRecord handles a single `aws logs tail` line:
 // 2024-01-15T10:30:00+00:00 log-group/log-stream message...
 func (f *CloudWatchFormat) ParseRecord(line string) (LogRecord, error) {
