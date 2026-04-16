@@ -25,7 +25,7 @@ func main() {
 				Name:    "format",
 				Aliases: []string{"f"},
 				Value:   "auto",
-				Usage:   fmt.Sprintf("Log format: auto, %s", strings.Join(logpkg.FormatNames(), ", ")),
+				Usage:   "Log format (auto, or a specific format name)",
 			},
 			&cli.StringFlag{
 				Name:  "cpuprofile",
@@ -58,6 +58,8 @@ func run(ctx context.Context, cmd *cli.Command) error {
 		}
 		defer pprof.StopCPUProfile()
 	}
+
+	logpkg.LoadPlugins()
 
 	var format logpkg.Format
 	if name := cmd.String("format"); name != "auto" {
