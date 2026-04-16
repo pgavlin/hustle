@@ -5,11 +5,16 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 
 	"github.com/segmentio/encoding/json"
 )
+
+var tokPool = sync.Pool{
+	New: func() any { return json.NewTokenizer(nil) },
+}
 
 // JSONFormat parses JSON log lines, auto-detecting common field name variants
 // for time, level, and message across slog, zap, zerolog, logrus, bunyan, and docker.
@@ -25,7 +30,10 @@ func (f *JSONFormat) ParseRecord(line string) (LogRecord, error) {
 		Attrs:   make(map[string]any, 4),
 	}
 
-	tok := json.NewTokenizer(b)
+	tok := tokPool.Get().(*json.Tokenizer)
+	tok.Reset(b)
+	defer tokPool.Put(tok)
+
 	if !tok.Next() || tok.Delim != '{' {
 		return LogRecord{}, fmt.Errorf("expected JSON object")
 	}

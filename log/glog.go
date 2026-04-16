@@ -214,13 +214,8 @@ func parseKlogStructuredMessage(rec *LogRecord) {
 		return
 	}
 
-	pairs, err := parseLogfmt(rest)
-	if err != nil || len(pairs) == 0 {
+	if !parseLogfmtAttrs(rest, rec.Attrs) {
 		return // not structured — keep original message
 	}
-
 	rec.Msg = quotedMsg
-	for _, p := range pairs {
-		rec.Attrs[p.key] = inferValue(p.value)
-	}
 }
