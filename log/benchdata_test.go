@@ -1,7 +1,9 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
+	"log/slog"
 	"math/rand/v2"
 	"strings"
 	"time"
@@ -44,29 +46,46 @@ func generateGlogLines(n int) []string {
 	return lines
 }
 
-// generateJSONLines generates n deterministic slog JSON log lines.
+// generateJSONLines generates n deterministic slog JSON log lines
+// using log/slog's JSONHandler for authentic output.
 func generateJSONLines(n int) []string {
 	rng := rand.New(rand.NewPCG(benchSeed, 0))
 	ts := time.Date(2024, 6, 15, 8, 0, 0, 0, time.UTC)
-	lines := make([]string, n)
 
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+		// Use a fixed time via ReplaceAttr so slog doesn't use wall clock.
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			return a
+		},
+	}))
+
+	lines := make([]string, n)
 	for i := range n {
-		lvl := jsonLevel(rng)
+		lvl := slogLevel(rng)
 		ts = ts.Add(time.Duration(rng.IntN(500)+1) * time.Millisecond)
 		msg := pickMessage(rng)
 
-		var b strings.Builder
-		fmt.Fprintf(&b, `{"time":"%s","level":"%s","msg":"%s"`,
-			ts.Format(time.RFC3339Nano), lvl, jsonEscapeBench(msg))
-
+		attrs := make([]slog.Attr, 0, 6)
 		nAttrs := rng.IntN(6)
 		for range nAttrs {
 			k, v := pickAttr(rng)
-			fmt.Fprintf(&b, `,"%s":"%s"`, k, jsonEscapeBench(v))
+			attrs = append(attrs, slog.String(k, v))
 		}
-		b.WriteByte('}')
 
-		lines[i] = b.String()
+		buf.Reset()
+		args := make([]any, len(attrs))
+		for j, a := range attrs {
+			args[j] = a
+		}
+		record := slog.NewRecord(ts, lvl, msg, 0)
+		record.AddAttrs(attrs...)
+		logger.Handler().Handle(nil, record)
+
+		// slog writes a trailing newline; trim it
+		line := strings.TrimRight(buf.String(), "\n")
+		lines[i] = line
 	}
 	return lines
 }
@@ -113,6 +132,17 @@ var jsonLevels = []string{"DEBUG", "INFO", "INFO", "INFO", "INFO", "WARN", "WARN
 
 func jsonLevel(rng *rand.Rand) string {
 	return jsonLevels[rng.IntN(len(jsonLevels))]
+}
+
+var slogLevels = []slog.Level{
+	slog.LevelDebug,
+	slog.LevelInfo, slog.LevelInfo, slog.LevelInfo, slog.LevelInfo,
+	slog.LevelWarn, slog.LevelWarn,
+	slog.LevelError,
+}
+
+func slogLevel(rng *rand.Rand) slog.Level {
+	return slogLevels[rng.IntN(len(slogLevels))]
 }
 
 var messages = []string{
@@ -200,6 +230,3 @@ func pickAttr(rng *rand.Rand) (string, string) {
 	return gen.key, gen.values[rng.IntN(len(gen.values))]
 }
 
-func jsonEscapeBench(s string) string {
-	return strings.ReplaceAll(s, `"`, `\"`)
-}
