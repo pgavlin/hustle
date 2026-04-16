@@ -48,7 +48,17 @@ func DetectFormat(r io.Reader) (Format, []string, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("reading sample: %w", err)
 	}
-	lines := splitLines(data)
+	// Collect all lines for the caller (they need them back).
+	var lines []string
+	rest := data
+	for {
+		line, remaining := nextLine(rest)
+		if line == "" {
+			break
+		}
+		lines = append(lines, line)
+		rest = remaining
+	}
 	format, err := detectFormatFromLines(lines)
 	return format, lines, err
 }

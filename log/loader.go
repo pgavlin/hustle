@@ -64,7 +64,7 @@ func Load(path string, format Format) (*LogFile, error) {
 		return nil, fmt.Errorf("mmap %s: %w", path, err)
 	}
 
-	records, skipped, detected, parseErr := loadLines(splitLines(data), format, len(data)/200)
+	records, skipped, detected, parseErr := parseData(data, format, 0)
 	if parseErr != nil {
 		closer.Close()
 		return nil, parseErr
@@ -89,21 +89,16 @@ func LoadReader(r io.Reader, format Format) (*LogFile, error) {
 		return &LogFile{Records: records, Skipped: skipped, Format: fmt}, nil
 	}
 
-	records, skipped, detected, err := loadLines(splitLines(data), format, 0)
+	records, skipped, detected, err := parseData(data, format, 0)
 	if err != nil {
 		return nil, err
 	}
 	return &LogFile{Records: records, Skipped: skipped, Format: detected}, nil
 }
 
-// splitLines returns zero-copy string views of each non-empty line in data.
-// All returned strings share the backing array of data; the caller must keep
-// data alive (e.g. via an active mmap) for as long as the strings are in use.
-func splitLines(data []byte) []string {
-	if len(data) == 0 {
-		return nil
-	}
-	lines := make([]string, 0, len(data)/200+1)
+// nextLine extracts the next non-empty line from data, returning the line
+// as a zero-copy string and the remaining data. Returns ("", nil) when done.
+func nextLine(data []byte) (string, []byte) {
 	for len(data) > 0 {
 		i := bytes.IndexByte(data, '\n')
 		var line []byte
@@ -114,34 +109,52 @@ func splitLines(data []byte) []string {
 			line = data[:i]
 			data = data[i+1:]
 		}
-		// Strip trailing \r (CRLF)
 		if len(line) > 0 && line[len(line)-1] == '\r' {
 			line = line[:len(line)-1]
 		}
 		if len(line) > 0 {
-			lines = append(lines, unsafe.String(unsafe.SliceData(line), len(line)))
+			return unsafe.String(unsafe.SliceData(line), len(line)), data
 		}
 	}
-	return lines
+	return "", nil
 }
 
-// loadLines parses pre-split lines using the given format.
+// parseData parses log records from raw data in a single pass.
 // If format is nil, it auto-detects from the first detectSampleSize lines.
-func loadLines(lines []string, format Format, sizeHint int) ([]LogRecord, int, Format, error) {
+func parseData(data []byte, format Format, sizeHint int) ([]LogRecord, int, Format, error) {
 	if format == nil {
+		// Sample first N lines for detection without building a full []string.
+		sample := make([]string, 0, detectSampleSize)
+		rest := data
+		for len(sample) < detectSampleSize {
+			line, remaining := nextLine(rest)
+			if line == "" {
+				break
+			}
+			sample = append(sample, line)
+			rest = remaining
+		}
+
 		var err error
-		format, err = detectFormatFromLines(lines)
+		format, err = detectFormatFromLines(sample)
 		if err != nil {
 			return nil, 0, nil, err
 		}
 	}
 
 	if sizeHint == 0 {
-		sizeHint = len(lines)
+		sizeHint = bytes.Count(data, []byte{'\n'}) + 1
 	}
 	records := make([]LogRecord, 0, sizeHint)
 	skipped := 0
-	for _, line := range lines {
+
+	// Single pass: scan for \n and parse each line.
+	for len(data) > 0 {
+		var line string
+		line, data = nextLine(data)
+		if line == "" {
+			break
+		}
 		rec, err := format.ParseRecord(line)
 		if err != nil {
 			skipped++
@@ -149,5 +162,6 @@ func loadLines(lines []string, format Format, sizeHint int) ([]LogRecord, int, F
 		}
 		records = append(records, rec)
 	}
+
 	return records, skipped, format, nil
 }

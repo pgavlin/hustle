@@ -61,11 +61,10 @@ func TestDetectFormat_SkipsDocumentFormats(t *testing.T) {
 	original := append([]Format(nil), Formats...)
 	defer func() { Formats = original }()
 	Formats = append(Formats, &CloudWatchFormat{})
-	input := `{"time":"2024-01-15T10:30:00Z","level":"INFO","msg":"hello"}
-{"time":"2024-01-15T10:30:01Z","level":"ERROR","msg":"oops"}
-`
-	lines := splitLines([]byte(input))
-	f, err := detectFormatFromLines(lines)
+	f, err := detectFormatFromLines([]string{
+		`{"time":"2024-01-15T10:30:00Z","level":"INFO","msg":"hello"}`,
+		`{"time":"2024-01-15T10:30:01Z","level":"ERROR","msg":"oops"}`,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

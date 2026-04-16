@@ -46,7 +46,7 @@ func BenchmarkParseRecord(b *testing.B) {
 	})
 }
 
-// BenchmarkLoad benchmarks the full load path: splitLines + detect + parse.
+// BenchmarkLoad benchmarks the full load path: scan + detect + parse.
 func BenchmarkLoad(b *testing.B) {
 	const nLines = 100_000
 
@@ -56,8 +56,7 @@ func BenchmarkLoad(b *testing.B) {
 		b.ResetTimer()
 		b.ReportAllocs()
 		for range b.N {
-			lines := splitLines(data)
-			loadLines(lines, &GlogFormat{}, len(lines))
+			parseData(data, &GlogFormat{}, 0)
 		}
 	})
 
@@ -67,8 +66,7 @@ func BenchmarkLoad(b *testing.B) {
 		b.ResetTimer()
 		b.ReportAllocs()
 		for range b.N {
-			lines := splitLines(data)
-			loadLines(lines, &JSONFormat{}, len(lines))
+			parseData(data, &JSONFormat{}, 0)
 		}
 	})
 
@@ -78,8 +76,7 @@ func BenchmarkLoad(b *testing.B) {
 		b.ResetTimer()
 		b.ReportAllocs()
 		for range b.N {
-			lines := splitLines(data)
-			loadLines(lines, &LogfmtFormat{}, len(lines))
+			parseData(data, &LogfmtFormat{}, 0)
 		}
 	})
 }
@@ -103,16 +100,4 @@ func BenchmarkDetect(b *testing.B) {
 			detectFormatFromLines(lines)
 		}
 	})
-}
-
-// BenchmarkSplitLines benchmarks zero-copy line splitting.
-func BenchmarkSplitLines(b *testing.B) {
-	const nLines = 100_000
-	data := []byte(strings.Join(generateGlogLines(nLines), "\n"))
-	b.SetBytes(int64(len(data)))
-	b.ResetTimer()
-	b.ReportAllocs()
-	for range b.N {
-		splitLines(data)
-	}
 }
