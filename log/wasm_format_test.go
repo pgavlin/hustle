@@ -1,6 +1,7 @@
 package log
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -16,18 +17,29 @@ func testdataDir(t *testing.T) string {
 	return filepath.Join(filepath.Dir(file), "testdata")
 }
 
-func TestWASMFormat_GoPlugin(t *testing.T) {
-	wasmPath := filepath.Join(testdataDir(t), "example-go.wasm")
+func loadTestWASM(t *testing.T, name string) Format {
+	t.Helper()
+	wasmPath := filepath.Join(testdataDir(t), name)
 	data, err := os.ReadFile(wasmPath)
 	if err != nil {
 		t.Skipf("WASM test fixture not found: %v", err)
 	}
-
-	f, err := newWASMFormat(data)
+	// Use filename (without extension) as fallback name for stdio modules.
+	fallback := name[:len(name)-len(filepath.Ext(name))]
+	f, err := newWASMFormat(data, fallback)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	t.Cleanup(func() {
+		if c, ok := f.(io.Closer); ok {
+			c.Close()
+		}
+	})
+	return f
+}
+
+func TestWASMFormat_GoPlugin(t *testing.T) {
+	f := loadTestWASM(t, "example-go.wasm")
 
 	if f.Name() != "example-go" {
 		t.Errorf("name = %q, want example-go", f.Name())
@@ -52,17 +64,7 @@ func TestWASMFormat_GoPlugin(t *testing.T) {
 }
 
 func TestWASMFormat_RustPlugin(t *testing.T) {
-	wasmPath := filepath.Join(testdataDir(t), "example-rust.wasm")
-	data, err := os.ReadFile(wasmPath)
-	if err != nil {
-		t.Skipf("WASM test fixture not found: %v", err)
-	}
-
-	f, err := newWASMFormat(data)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
+	f := loadTestWASM(t, "example-rust.wasm")
 
 	if f.Name() != "example-rust" {
 		t.Errorf("name = %q, want example-rust", f.Name())
@@ -86,20 +88,36 @@ func TestWASMFormat_RustPlugin(t *testing.T) {
 	}
 }
 
-func TestWASMFormat_ParseError(t *testing.T) {
-	wasmPath := filepath.Join(testdataDir(t), "example-go.wasm")
-	data, err := os.ReadFile(wasmPath)
-	if err != nil {
-		t.Skipf("WASM test fixture not found: %v", err)
+func TestWASMFormat_JSPlugin(t *testing.T) {
+	f := loadTestWASM(t, "example-js.wasm")
+
+	// Stdio modules use the filename as the format name.
+	if f.Name() != "example-js" {
+		t.Errorf("name = %q, want example-js", f.Name())
 	}
 
-	f, err := newWASMFormat(data)
+	rec, err := f.ParseRecord("WARN: disk usage high percent=92")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	if rec.Level != "WARN" {
+		t.Errorf("level = %q, want WARN", rec.Level)
+	}
+	if rec.Msg != "disk usage high" {
+		t.Errorf("msg = %q, want 'disk usage high'", rec.Msg)
+	}
+	if rec.Attrs["percent"] != "92" {
+		t.Errorf("percent = %v (%T), want '92'", rec.Attrs["percent"], rec.Attrs["percent"])
+	}
+	if rec.RawJSON != "WARN: disk usage high percent=92" {
+		t.Errorf("RawJSON = %q", rec.RawJSON)
+	}
+}
 
-	_, err = f.ParseRecord("this is not a valid line")
+func TestWASMFormat_ParseError(t *testing.T) {
+	f := loadTestWASM(t, "example-go.wasm")
+
+	_, err := f.ParseRecord("this is not a valid line")
 	if err == nil {
 		t.Error("expected error for unparseable line")
 	}

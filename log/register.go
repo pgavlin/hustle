@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -90,5 +91,9 @@ func loadWASMFormat(path string) (Format, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read WASM file: %w", err)
 	}
-	return newWASMFormat(data)
+	// Derive a fallback name from the filename (for stdio-based modules
+	// that can't self-report their name).
+	base := filepath.Base(path)
+	name := strings.TrimSuffix(base, filepath.Ext(base))
+	return newWASMFormat(data, name)
 }
