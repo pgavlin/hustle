@@ -229,4 +229,3 @@ func pickAttr(rng *rand.Rand) (string, string) {
 	gen := attrGens[rng.IntN(len(attrGens))]
 	return gen.key, gen.values[rng.IntN(len(gen.values))]
 }
-
