@@ -50,3 +50,28 @@ func TestLoadPlugins_WarnsOnBadPlugin(t *testing.T) {
 		t.Errorf("expected 1 warning, got %d: %v", len(warnings), warnings)
 	}
 }
+
+func TestLoadPlugins_NameCollisionIgnored(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "json.toml"), []byte(`
+name = "json"
+pattern = '^(?P<msg>.*)'
+`), 0644)
+
+	original := append([]Format(nil), Formats...)
+	defer func() { Formats = original }()
+
+	warnings := LoadPluginsFrom(dir)
+	found := false
+	for _, w := range warnings {
+		if len(w) > 0 {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected warning for name collision with built-in")
+	}
+	if len(Formats) != len(original) {
+		t.Errorf("formats count changed: %d -> %d", len(original), len(Formats))
+	}
+}

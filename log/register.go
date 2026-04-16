@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	"github.com/BurntSushi/toml"
 )
 
 func DefaultPluginDir() string {
@@ -76,7 +78,11 @@ func LoadPluginsFrom(dir string) []string {
 }
 
 func loadRegexFormat(path string) (Format, error) {
-	return nil, fmt.Errorf("regex format loading not yet implemented")
+	var cfg regexConfig
+	if _, err := toml.DecodeFile(path, &cfg); err != nil {
+		return nil, fmt.Errorf("parse TOML: %w", err)
+	}
+	return newRegexFormat(cfg)
 }
 
 func loadWASMFormat(path string) (Format, error) {
