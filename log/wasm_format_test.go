@@ -81,6 +81,31 @@ func TestWASMFormat_RustPlugin(t *testing.T) {
 	}
 }
 
+func TestWASMFormat_ZigPlugin(t *testing.T) {
+	f := loadTestWASM(t, "example-zig.wasm")
+
+	if f.Name() != "example-zig" {
+		t.Errorf("name = %q, want example-zig", f.Name())
+	}
+
+	rec, err := f.ParseRecord("DEBUG: cache miss key=user:123 ttl=300")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec.Level != "DEBUG" {
+		t.Errorf("level = %q, want DEBUG", rec.Level)
+	}
+	if rec.Msg != "cache miss" {
+		t.Errorf("msg = %q, want 'cache miss'", rec.Msg)
+	}
+	if rec.Attrs["key"] != "user:123" {
+		t.Errorf("key = %v, want user:123", rec.Attrs["key"])
+	}
+	if rec.Attrs["ttl"] != "300" {
+		t.Errorf("ttl = %v, want 300", rec.Attrs["ttl"])
+	}
+}
+
 func TestWASMFormat_ParseError(t *testing.T) {
 	f := loadTestWASM(t, "example-go.wasm")
 
