@@ -16,6 +16,27 @@ jobs:
         with:
           go-version: "1.25"
 
+      - name: Install TinyGo
+        run: |
+          wget -q https://github.com/tinygo-org/tinygo/releases/download/v0.40.0/tinygo_0.40.0_amd64.deb
+          sudo dpkg -i tinygo_0.40.0_amd64.deb
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Build WASM plugins
+        run: |
+          cd examples/wasm-plugin-go && tinygo build -o ../../log/testdata/example-go.wasm -target wasm -no-debug main.go && cd ../..
+          cd examples/wasm-plugin-rust && cargo build --target wasm32-unknown-unknown --release && cp target/wasm32-unknown-unknown/release/hustle_plugin_example.wasm ../../log/testdata/example-rust.wasm && cd ../..
+          cd examples/wasm-plugin-zig && zig build-exe -target wasm32-freestanding -O ReleaseSmall --export=name --export=parse --export=alloc --export=dealloc -fno-entry plugin.zig && cp plugin.wasm ../../log/testdata/example-zig.wasm && cd ../..
+
       - name: Build
         run: go build ./...
 
@@ -38,39 +59,3 @@ jobs:
         run: |
           gofumpt -l -d .
           test -z "$(gofumpt -l .)"
-
-  wasm-plugins:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install TinyGo
-        run: |
-          wget -q https://github.com/tinygo-org/tinygo/releases/download/v0.40.0/tinygo_0.40.0_amd64.deb
-          sudo dpkg -i tinygo_0.40.0_amd64.deb
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.25"
-
-      - name: Build Go WASM plugin
-        working-directory: examples/wasm-plugin-go
-        run: tinygo build -o plugin.wasm -target wasm -no-debug main.go
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-
-      - name: Build Rust WASM plugin
-        working-directory: examples/wasm-plugin-rust
-        run: cargo build --target wasm32-unknown-unknown --release
-
-      - name: Install Zig
-        uses: mlugg/setup-zig@v2
-        with:
-          version: 0.16.0
-
-      - name: Build Zig WASM plugin
-        working-directory: examples/wasm-plugin-zig
-        run: zig build-exe -target wasm32-freestanding -O ReleaseSmall --export=name --export=parse --export=alloc --export=dealloc -fno-entry plugin.zig
