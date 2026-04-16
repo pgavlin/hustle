@@ -8,12 +8,12 @@ import (
 	"unicode"
 
 	"charm.land/bubbles/v2/cursor"
-	"github.com/pgavlin/hustle/internal/textinput/runeutil"
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/atotto/clipboard"
 	rw "github.com/mattn/go-runewidth"
+	"github.com/pgavlin/hustle/internal/textinput/runeutil"
 	"github.com/rivo/uniseg"
 )
 

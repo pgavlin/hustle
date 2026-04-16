@@ -23,8 +23,8 @@ func TestLoadPlugins_EmptyDir(t *testing.T) {
 
 func TestLoadPlugins_IgnoresUnknownExtensions(t *testing.T) {
 	dir := t.TempDir()
-	os.WriteFile(filepath.Join(dir, "README.md"), []byte("# hello"), 0644)
-	os.WriteFile(filepath.Join(dir, "notes.txt"), []byte("some notes"), 0644)
+	os.WriteFile(filepath.Join(dir, "README.md"), []byte("# hello"), 0o644)
+	os.WriteFile(filepath.Join(dir, "notes.txt"), []byte("some notes"), 0o644)
 
 	original := append([]Format(nil), Formats...)
 	defer func() { Formats = original }()
@@ -40,7 +40,7 @@ func TestLoadPlugins_IgnoresUnknownExtensions(t *testing.T) {
 
 func TestLoadPlugins_WarnsOnBadPlugin(t *testing.T) {
 	dir := t.TempDir()
-	os.WriteFile(filepath.Join(dir, "bad.toml"), []byte("invalid"), 0644)
+	os.WriteFile(filepath.Join(dir, "bad.toml"), []byte("invalid"), 0o644)
 
 	original := append([]Format(nil), Formats...)
 	defer func() { Formats = original }()
@@ -57,7 +57,7 @@ func TestLoadPlugins_RegexIntegration(t *testing.T) {
 name = "custom"
 pattern = '^(?P<time>[\dT:.Z-]+) (?P<level>\w+) \[(?P<component>\w+)\] (?P<msg>.*)'
 time_format = "2006-01-02T15:04:05Z"
-`), 0644)
+`), 0o644)
 
 	original := append([]Format(nil), Formats...)
 	defer func() { Formats = original }()
@@ -95,11 +95,11 @@ func TestLoadPlugins_AlphabeticalOrder(t *testing.T) {
 	os.WriteFile(filepath.Join(dir, "02-second.toml"), []byte(`
 name = "second"
 pattern = '^(?P<msg>.*)'
-`), 0644)
+`), 0o644)
 	os.WriteFile(filepath.Join(dir, "01-first.toml"), []byte(`
 name = "first"
 pattern = '^(?P<msg>.*)'
-`), 0644)
+`), 0o644)
 
 	original := append([]Format(nil), Formats...)
 	defer func() { Formats = original }()
@@ -123,7 +123,7 @@ func TestLoadPlugins_NameCollisionIgnored(t *testing.T) {
 	os.WriteFile(filepath.Join(dir, "json.toml"), []byte(`
 name = "json"
 pattern = '^(?P<msg>.*)'
-`), 0644)
+`), 0o644)
 
 	original := append([]Format(nil), Formats...)
 	defer func() { Formats = original }()

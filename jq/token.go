@@ -4,45 +4,45 @@ package jq
 type TokenKind int
 
 const (
-	TokenEOF       TokenKind = iota
-	TokenDot                 // .
-	TokenDotField            // .foo (dot + identifier)
-	TokenDotDot              // ..
-	TokenIdent               // bare identifier
-	TokenVariable            // $foo
-	TokenNumber              // 42, 3.14, 1e10
-	TokenString              // "hello"
-	TokenPipe                // |
-	TokenComma               // ,
-	TokenPlus                // +
-	TokenMinus               // -
-	TokenStar                // *
-	TokenSlash               // /
-	TokenPercent             // %
-	TokenEq                  // ==
-	TokenNe                  // !=
-	TokenLt                  // <
-	TokenGt                  // >
-	TokenLe                  // <=
-	TokenGe                  // >=
-	TokenAlt                 // //
-	TokenUpdateAlt           // //=
-	TokenUpdatePipe          // |=
-	TokenUpdateAdd           // +=
-	TokenUpdateSub           // -=
-	TokenUpdateMul           // *=
-	TokenUpdateDiv           // /=
-	TokenUpdateMod           // %=
-	TokenAssign              // =
-	TokenLParen              // (
-	TokenRParen              // )
-	TokenLBracket            // [
-	TokenRBracket            // ]
-	TokenLBrace              // {
-	TokenRBrace              // }
-	TokenColon               // :
-	TokenSemicolon           // ;
-	TokenQuestion            // ?
+	TokenEOF        TokenKind = iota
+	TokenDot                  // .
+	TokenDotField             // .foo (dot + identifier)
+	TokenDotDot               // ..
+	TokenIdent                // bare identifier
+	TokenVariable             // $foo
+	TokenNumber               // 42, 3.14, 1e10
+	TokenString               // "hello"
+	TokenPipe                 // |
+	TokenComma                // ,
+	TokenPlus                 // +
+	TokenMinus                // -
+	TokenStar                 // *
+	TokenSlash                // /
+	TokenPercent              // %
+	TokenEq                   // ==
+	TokenNe                   // !=
+	TokenLt                   // <
+	TokenGt                   // >
+	TokenLe                   // <=
+	TokenGe                   // >=
+	TokenAlt                  // //
+	TokenUpdateAlt            // //=
+	TokenUpdatePipe           // |=
+	TokenUpdateAdd            // +=
+	TokenUpdateSub            // -=
+	TokenUpdateMul            // *=
+	TokenUpdateDiv            // /=
+	TokenUpdateMod            // %=
+	TokenAssign               // =
+	TokenLParen               // (
+	TokenRParen               // )
+	TokenLBracket             // [
+	TokenRBracket             // ]
+	TokenLBrace               // {
+	TokenRBrace               // }
+	TokenColon                // :
+	TokenSemicolon            // ;
+	TokenQuestion             // ?
 )
 
 // Token is a lexer token with position information.

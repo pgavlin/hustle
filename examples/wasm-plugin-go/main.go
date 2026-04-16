@@ -1,10 +1,12 @@
 // Example hustle format plugin in Go, compiled with TinyGo.
 //
 // Parses lines of the form:
-//   LEVEL: message key=value key=value ...
+//
+//	LEVEL: message key=value key=value ...
 //
 // Build:
-//   tinygo build -o plugin.wasm -target wasm -no-debug main.go
+//
+//	tinygo build -o plugin.wasm -target wasm -no-debug main.go
 package main
 
 import (

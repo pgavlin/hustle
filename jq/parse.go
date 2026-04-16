@@ -7,15 +7,15 @@ import (
 
 // Precedence levels for Pratt-style parsing.
 const (
-	precPipe    = 1  // | (right-associative)
-	precComma   = 2  // , (left-associative)
-	precAs      = 3  // as (patterns)
-	precAlt     = 4  // // (right-associative)
-	precOr      = 5  // or
-	precAnd     = 6  // and
-	precCompare = 7  // == != < > <= >=
-	precAdd     = 8  // + -
-	precMul     = 9  // * / %
+	precPipe    = 1 // | (right-associative)
+	precComma   = 2 // , (left-associative)
+	precAs      = 3 // as (patterns)
+	precAlt     = 4 // // (right-associative)
+	precOr      = 5 // or
+	precAnd     = 6 // and
+	precCompare = 7 // == != < > <= >=
+	precAdd     = 8 // + -
+	precMul     = 9 // * / %
 )
 
 // Parse tokenizes src and parses it into an AST.

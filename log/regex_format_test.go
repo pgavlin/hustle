@@ -130,7 +130,7 @@ func TestLoadRegexFormat_FromFile(t *testing.T) {
 	os.WriteFile(path, []byte(`
 name = "myapp"
 pattern = '^(?P<level>\w+) (?P<msg>.*)'
-`), 0644)
+`), 0o644)
 	f, err := loadRegexFormat(path)
 	if err != nil {
 		t.Fatal(err)
@@ -145,7 +145,7 @@ func TestLoadRegexFormat_MissingName(t *testing.T) {
 	path := filepath.Join(dir, "noname.toml")
 	os.WriteFile(path, []byte(`
 pattern = '^(?P<level>\w+) (?P<msg>.*)'
-`), 0644)
+`), 0o644)
 	_, err := loadRegexFormat(path)
 	if err == nil {
 		t.Error("expected error for missing name")
@@ -157,7 +157,7 @@ func TestLoadRegexFormat_MissingPattern(t *testing.T) {
 	path := filepath.Join(dir, "nopat.toml")
 	os.WriteFile(path, []byte(`
 name = "nopat"
-`), 0644)
+`), 0o644)
 	_, err := loadRegexFormat(path)
 	if err == nil {
 		t.Error("expected error for missing pattern")

@@ -7,14 +7,16 @@ type Shape interface {
 	shape()
 }
 
-type ObjectShape struct{ Fields map[string]Shape }
-type ArrayShape struct{ Element Shape }
-type StringShape struct{}
-type NumberShape struct{}
-type BoolShape struct{}
-type NullShape struct{}
-type AnyShape struct{}
-type UnionShape struct{ Alternatives []Shape }
+type (
+	ObjectShape struct{ Fields map[string]Shape }
+	ArrayShape  struct{ Element Shape }
+	StringShape struct{}
+	NumberShape struct{}
+	BoolShape   struct{}
+	NullShape   struct{}
+	AnyShape    struct{}
+	UnionShape  struct{ Alternatives []Shape }
+)
 
 // EnumShape wraps an inner Shape with a known set of values.
 // Used when a field has a small number of distinct observed values.
@@ -38,7 +40,7 @@ func (EnumShape) shape()   {}
 // When Unknown is false, Data holds the concrete value.
 type Value struct {
 	Shape   Shape
-	Data    any  // nil | bool | float64 | string | []Value | map[string]Value
+	Data    any // nil | bool | float64 | string | []Value | map[string]Value
 	Unknown bool
 }
 

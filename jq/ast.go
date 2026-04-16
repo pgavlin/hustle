@@ -172,10 +172,10 @@ func (n *ReduceNode) nodeSpan() Span { return n.Span }
 // ForeachNode represents foreach expr as $pat (init; update; extract).
 type ForeachNode struct {
 	Span
-	Expr            Node
-	Pattern         string
-	Init, Update    Node
-	Extract         Node
+	Expr         Node
+	Pattern      string
+	Init, Update Node
+	Extract      Node
 }
 
 func (n *ForeachNode) nodeSpan() Span { return n.Span }
