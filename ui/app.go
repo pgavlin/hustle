@@ -3,6 +3,7 @@ package ui
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 	"time"
 
@@ -52,7 +53,7 @@ func New(records []logpkg.LogRecord, skipped int, formatName string) Model {
 		records:    records,
 		skipped:    skipped,
 		formatName: formatName,
-		inputShape: jq.InferShape(recordsToMaps(records)),
+		inputShape: jq.InferShape(recordFields(records)),
 		view:       viewGrid,
 	}
 }
@@ -224,19 +225,29 @@ func (m Model) statusBar() string {
 	return statusBarStyle.Width(m.width).Render(text)
 }
 
-// recordsToMaps returns an iterator that yields each LogRecord as a map[string]any
-// for jq shape inference.
-func recordsToMaps(records []logpkg.LogRecord) func(yield func(map[string]any) bool) {
-	return func(yield func(map[string]any) bool) {
+// recordFields returns an iterator of objects for jq shape inference.
+// Each object is an iterator of key-value pairs yielded directly from the
+// LogRecord fields — no intermediate map allocation.
+func recordFields(records []logpkg.LogRecord) iter.Seq[iter.Seq2[string, any]] {
+	return func(yield func(iter.Seq2[string, any]) bool) {
 		for _, rec := range records {
-			m := make(map[string]any, 3+len(rec.Attrs))
-			m["time"] = rec.Time.Format(time.RFC3339Nano)
-			m["level"] = rec.Level
-			m["msg"] = rec.Msg
-			for _, kv := range rec.Attrs {
-				m[kv.Key] = kv.Value
+			obj := func(yield func(string, any) bool) {
+				if !yield("time", rec.Time.Format(time.RFC3339Nano)) {
+					return
+				}
+				if !yield("level", rec.Level) {
+					return
+				}
+				if !yield("msg", rec.Msg) {
+					return
+				}
+				for _, kv := range rec.Attrs {
+					if !yield(kv.Key, kv.Value) {
+						return
+					}
+				}
 			}
-			if !yield(m) {
+			if !yield(obj) {
 				return
 			}
 		}

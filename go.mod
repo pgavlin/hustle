@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.6
 	github.com/mattn/go-runewidth v0.0.20
-	github.com/pgavlin/jq v0.0.0-20260417001456-5312a01c2808
+	github.com/pgavlin/jq v0.0.0-20260417002108-dfcee41ad577
 	github.com/pgavlin/tea-grid v0.0.0-20260409091103-17dbb04ca804
 	github.com/rivo/uniseg v0.4.7
 	github.com/segmentio/encoding v0.5.4

@@ -48,6 +48,8 @@ github.com/muesli/termenv v0.16.0 h1:S5AlUN9dENB57rsbnkPyfdGuWIlkmzJjbFf0Tf5FWUc
 github.com/muesli/termenv v0.16.0/go.mod h1:ZRfOIKPFDYQoDFF4Olj7/QJbW60Ol/kL1pU3VfY/Cnk=
 github.com/pgavlin/jq v0.0.0-20260417001456-5312a01c2808 h1:r0bOs6DZJGrL7BgeowTr9FbiqkXnufAusvAu5asvuig=
 github.com/pgavlin/jq v0.0.0-20260417001456-5312a01c2808/go.mod h1:X2T/yU8Mm+UDDY4r3h43ccsIjAOxt+qXtF+d1CI1boA=
+github.com/pgavlin/jq v0.0.0-20260417002108-dfcee41ad577 h1:Uf/fsROe42nOC66D8MnjxROqAu4uUM0dypNyzaCMK2g=
+github.com/pgavlin/jq v0.0.0-20260417002108-dfcee41ad577/go.mod h1:X2T/yU8Mm+UDDY4r3h43ccsIjAOxt+qXtF+d1CI1boA=
 github.com/pgavlin/stain v0.0.0-20260409075514-74ef9e0ec0f5 h1:n7k1KtvdmYe0C2SJpuMDBoCydCtxg1is4Yhwj+1kSMs=
 github.com/pgavlin/stain v0.0.0-20260409075514-74ef9e0ec0f5/go.mod h1:f6t+eypHGK043cgQWy3xpmYsL59OAr1ajv1AZ/a1RTo=
 github.com/pgavlin/tea-grid v0.0.0-20260409091103-17dbb04ca804 h1:D/sEgDV8/mHmm67SQZs4EnOe4XOVpnYYC6wswbo/kSE=
