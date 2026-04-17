@@ -4,13 +4,14 @@ package ui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/pgavlin/jq"
 	"github.com/pgavlin/tea-grid/grid"
 
 	filterpkg "github.com/pgavlin/hustle/filter"
-	"github.com/pgavlin/hustle/jq"
 	logpkg "github.com/pgavlin/hustle/log"
 )
 
@@ -51,7 +52,7 @@ func New(records []logpkg.LogRecord, skipped int, formatName string) Model {
 		records:    records,
 		skipped:    skipped,
 		formatName: formatName,
-		inputShape: jq.InferShape(records),
+		inputShape: jq.InferShape(recordsToMaps(records)),
 		view:       viewGrid,
 	}
 }
@@ -221,4 +222,23 @@ func (m Model) statusBar() string {
 	}
 
 	return statusBarStyle.Width(m.width).Render(text)
+}
+
+// recordsToMaps returns an iterator that yields each LogRecord as a map[string]any
+// for jq shape inference.
+func recordsToMaps(records []logpkg.LogRecord) func(yield func(map[string]any) bool) {
+	return func(yield func(map[string]any) bool) {
+		for _, rec := range records {
+			m := make(map[string]any, 3+len(rec.Attrs))
+			m["time"] = rec.Time.Format(time.RFC3339Nano)
+			m["level"] = rec.Level
+			m["msg"] = rec.Msg
+			for _, kv := range rec.Attrs {
+				m[kv.Key] = kv.Value
+			}
+			if !yield(m) {
+				return
+			}
+		}
+	}
 }

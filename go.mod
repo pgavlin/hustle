@@ -9,7 +9,9 @@ require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/charmbracelet/x/ansi v0.11.6
 	github.com/mattn/go-runewidth v0.0.20
+	github.com/pgavlin/jq v0.0.0-20260417001456-5312a01c2808
 	github.com/pgavlin/tea-grid v0.0.0-20260409091103-17dbb04ca804
 	github.com/rivo/uniseg v0.4.7
 	github.com/segmentio/encoding v0.5.4
@@ -21,7 +23,6 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20260205113103-524a6607adb8 // indirect
-	github.com/charmbracelet/x/ansi v0.11.6 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect

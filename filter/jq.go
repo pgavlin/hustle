@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pgavlin/hustle/jq"
 	logpkg "github.com/pgavlin/hustle/log"
+	"github.com/pgavlin/jq"
 )
 
 // JQFilter is a compiled jq expression that can test LogRecords.

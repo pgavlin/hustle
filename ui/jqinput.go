@@ -5,7 +5,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/pgavlin/hustle/internal/textinput"
-	"github.com/pgavlin/hustle/jq"
+	"github.com/pgavlin/jq"
 )
 
 var (
